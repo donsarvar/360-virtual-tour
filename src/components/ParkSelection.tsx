@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
-import parkMagicCity from "@/assets/park-magic-city.jpg";
+import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkTashkentCity from "@/assets/park-tashkent-city.jpg";
 
 const ParkSelection = () => {
@@ -20,10 +20,10 @@ const ParkSelection = () => {
       image: parkBotanika,
     },
     {
-      id: "magic-city",
-      name: t.magicCity,
-      desc: t.magicCityDesc,
-      image: parkMagicCity,
+      id: "islamic-center",
+      name: t.islamicCenter,
+      desc: t.islamicCenterDesc,
+      image: parkIslamicCenter,
     },
     {
       id: "tashkent-city",

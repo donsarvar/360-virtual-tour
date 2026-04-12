@@ -5,15 +5,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info } from "lucide-react";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
-import parkMagicCity from "@/assets/park-magic-city.jpg";
+import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkTashkentCity from "@/assets/park-tashkent-city.jpg";
-import panoramaMagicCity from "@/assets/panorama-magic-city.jpg";
+import panoramaIslamicCenter from "@/assets/panorama-islamic-center.png";
 import panoramaBotanika from "@/assets/panorama-botanika.jpg";
 import panoramaTashkentCity from "@/assets/panorama-tashkent-city.jpg";
 
 const parkImages: Record<string, string> = {
   botanika: panoramaBotanika,
-  "magic-city": panoramaMagicCity,
+  "islamic-center": panoramaIslamicCenter,
   "tashkent-city": panoramaTashkentCity,
 };
 const hotspots: Record<string, Array<{ x: number; y: number; title: string; desc: string }>> = {
@@ -22,10 +22,10 @@ const hotspots: Record<string, Array<{ x: number; y: number; title: string; desc
     { x: 65, y: 35, title: "Rose Garden", desc: "A stunning collection of 150+ rose varieties blooming from April to October." },
     { x: 50, y: 70, title: "Japanese Corner", desc: "A tranquil zen garden with koi pond and traditional stone arrangements." },
   ],
-  "magic-city": [
-    { x: 25, y: 50, title: "Ferris Wheel", desc: "60-meter giant wheel offering panoramic views of the entire Tashkent skyline." },
-    { x: 60, y: 40, title: "Roller Coaster", desc: "The tallest and fastest roller coaster in Central Asia." },
-    { x: 75, y: 65, title: "Night Market", desc: "Vibrant food stalls and artisan crafts open until midnight." },
+  "islamic-center": [
+    { x: 25, y: 50, title: "Grand Hall", desc: "Exquisite architectural masterpiece with traditional patterns and golden calligraphy." },
+    { x: 60, y: 40, title: "Main Museum", desc: "Collection of ancient Quran manuscripts and priceless Islamic heritage." },
+    { x: 75, y: 65, title: "Scientific Library", desc: "A vast treasury of works by great Central Asian scholars and thinkers." },
   ],
   "tashkent-city": [
     { x: 50, y: 50, title: "Grand Fountain", desc: "A choreographed musical fountain with evening light shows." },
