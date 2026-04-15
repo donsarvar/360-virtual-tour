@@ -6,15 +6,15 @@ import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info } from "lucide-react";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
-import parkTashkentCity from "@/assets/park-tashkent-city.jpg";
+import parkEcoPark from "@/assets/park-ecopark.png";
 import panoramaIslamicCenter from "@/assets/panorama-islamic-center.png";
 import panoramaBotanika from "@/assets/panorama-botanika.jpg";
-import panoramaTashkentCity from "@/assets/panorama-tashkent-city.jpg";
+import panoramaEcoPark from "@/assets/park-ecopark.png";
 
 const parkImages: Record<string, string> = {
   botanika: panoramaBotanika,
   "islamic-center": panoramaIslamicCenter,
-  "tashkent-city": panoramaTashkentCity,
+  "ecopark": panoramaEcoPark,
 };
 const hotspots: Record<string, Array<{ x: number; y: number; title: string; desc: string }>> = {
   botanika: [
@@ -27,10 +27,10 @@ const hotspots: Record<string, Array<{ x: number; y: number; title: string; desc
     { x: 60, y: 40, title: "Main Museum", desc: "Collection of ancient Quran manuscripts and priceless Islamic heritage." },
     { x: 75, y: 65, title: "Scientific Library", desc: "A vast treasury of works by great Central Asian scholars and thinkers." },
   ],
-  "tashkent-city": [
-    { x: 50, y: 50, title: "Grand Fountain", desc: "A choreographed musical fountain with evening light shows." },
-    { x: 20, y: 40, title: "Observation Deck", desc: "360° views from the 22nd floor of Tashkent City Tower." },
-    { x: 80, y: 55, title: "Botanical Walk", desc: "Landscaped pathway featuring native Uzbekistan flora." },
+  "ecopark": [
+    { x: 30, y: 45, title: "Bobur Bog'i", desc: "Zahiriddin Muhammad Bobur sharafiga barpo etilgan tarixiy bog'." },
+    { x: 55, y: 40, title: "Hayvonot Bog'i", desc: "Turli xil hayvonlar va qushlar yashash joyi." },
+    { x: 75, y: 60, title: "Bolalar Maydoni", desc: "Bolalar uchun zamonaviy o'yin maydonchasi va attraksionlar." },
   ],
 };
 

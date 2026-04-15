@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
-import parkTashkentCity from "@/assets/park-tashkent-city.jpg";
+import parkEcoPark from "@/assets/park-ecopark.png";
 
 const ParkSelection = () => {
   const { t } = useLanguage();
@@ -14,22 +14,22 @@ const ParkSelection = () => {
 
   const parks = [
     {
-      id: "botanika",
-      name: t.botanika,
-      desc: t.botanikaDesc,
-      image: parkBotanika,
-    },
-    {
       id: "islamic-center",
       name: t.islamicCenter,
       desc: t.islamicCenterDesc,
       image: parkIslamicCenter,
     },
     {
-      id: "tashkent-city",
-      name: t.tashkentCity,
-      desc: t.tashkentCityDesc,
-      image: parkTashkentCity,
+      id: "botanika",
+      name: t.botanika,
+      desc: t.botanikaDesc,
+      image: parkBotanika,
+    },
+    {
+      id: "ecopark",
+      name: t.ecoPark,
+      desc: t.ecoParkDesc,
+      image: parkEcoPark,
     },
   ];
 
