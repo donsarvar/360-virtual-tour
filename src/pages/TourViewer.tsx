@@ -1,4 +1,4 @@
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -54,9 +54,9 @@ const TourViewer = () => {
   // Audio handling
   useEffect(() => {
     const audioUrls: Record<string, string> = {
-      "botanika": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=forest-birds-ambience-15024.mp3",
-      "islamic-center": "https://cdn.pixabay.com/download/audio/2022/03/25/audio_c8c8a7315b.mp3?filename=meditative-flute-10175.mp3",
-      "ecopark": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_2731c3609b.mp3?filename=park-ambience-15025.mp3",
+      "botanika": "/audio/Botanika bogi.m4a",
+      "islamic-center": "/audio/Islom sivilizatsiya markazi.mp3",
+      "ecopark": "/audio/Eko park.mp3",
     };
 
     if (soundOn && parkId && audioUrls[parkId]) {
