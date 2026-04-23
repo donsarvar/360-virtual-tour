@@ -33,21 +33,21 @@ const ParkSelection = () => {
       name: t.islamicCenter,
       desc: t.islamicCenterDesc,
       image: parkIslamicCenter,
-      coords: { lat: 41.338381, lng: 69.239618 }
+      coords: { lat: 41.3350498, lng: 69.2404586 }
     },
     {
       id: "botanika",
       name: t.botanika,
       desc: t.botanikaDesc,
       image: parkBotanika,
-      coords: { lat: 41.345862, lng: 69.300067 }
+      coords: { lat: 41.3448377, lng: 69.3106849 }
     },
     {
       id: "ecopark",
       name: t.ecoPark,
       desc: t.ecoParkDesc,
       image: parkEcoPark,
-      coords: { lat: 41.312151, lng: 69.288210 }
+      coords: { lat: 41.3125933, lng: 69.2946446 }
     },
   ];
 
