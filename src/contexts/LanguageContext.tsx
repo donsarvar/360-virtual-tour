@@ -25,6 +25,9 @@ const translations = {
     tourStartMessage: "Sayohat yuklanmoqda...",
     tayyor: "Tayyor",
     allRightsReserved: "Barcha huquqlar himoyalangan.",
+    distance: "Sizdan",
+    away: "uzoqda",
+    viewOnMap: "Xaritada ko'rish",
   },
   ru: {
     heroTitle: "Добро пожаловать в виртуальное путешествие",
@@ -48,6 +51,9 @@ const translations = {
     tourStartMessage: "Путешествие загружается...",
     tayyor: "Готово",
     allRightsReserved: "Все права защищены.",
+    distance: "От вас",
+    away: "от вас",
+    viewOnMap: "На карте",
   },
   en: {
     heroTitle: "Welcome to the Virtual Journey",
@@ -71,6 +77,9 @@ const translations = {
     tourStartMessage: "Loading journey...",
     tayyor: "Ready",
     allRightsReserved: "All rights reserved.",
+    distance: "Distance",
+    away: "away",
+    viewOnMap: "View on Map",
   },
 };
 
