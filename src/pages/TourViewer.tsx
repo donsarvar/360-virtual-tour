@@ -9,6 +9,10 @@ import * as THREE from "three";
 import { gsap } from "gsap";
 import LocationTracker from "@/components/LocationTracker";
 
+import parkBotanika from "@/assets/park-botanika.jpg";
+import parkIslamicCenter from "@/assets/park-islamic-center.png";
+import parkEcoPark from "@/assets/park-ecopark.png";
+
 const PanoramaSphere = ({ url, opacity = 1 }: { url: string; opacity?: number }) => {
   const texture = useLoader(THREE.TextureLoader, url);
   
@@ -67,6 +71,17 @@ const TourViewer = () => {
   };
 
   const parkFullDesc = getParkFullDesc(parkId);
+
+  const getParkImage = (id: string | undefined) => {
+    switch (id) {
+      case "botanika": return parkBotanika;
+      case "islamic-center": return parkIslamicCenter;
+      case "ecopark": return parkEcoPark;
+      default: return "";
+    }
+  };
+
+  const parkImage = getParkImage(parkId);
 
   const scenes = {
     image1: {
@@ -212,7 +227,7 @@ const TourViewer = () => {
                 <div className="space-y-6">
                   <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
                     <img 
-                      src={`/${parkId}/image1.jpg`} 
+                      src={parkImage} 
                       alt={parkName}
                       className="w-full h-full object-cover"
                     />
