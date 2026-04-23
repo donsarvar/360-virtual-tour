@@ -41,6 +41,7 @@ const TourViewer = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [soundOn, setSoundOn] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [currentScene, setCurrentScene] = useState<"image1">("image1");
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
@@ -55,6 +56,17 @@ const TourViewer = () => {
   };
 
   const parkName = getParkName(parkId);
+
+  const getParkFullDesc = (id: string | undefined) => {
+    switch (id) {
+      case "botanika": return t.botanikaFullDesc;
+      case "islamic-center": return t.islamicCenterFullDesc;
+      case "ecopark": return t.ecoParkFullDesc;
+      default: return "";
+    }
+  };
+
+  const parkFullDesc = getParkFullDesc(parkId);
 
   const scenes = {
     image1: {
@@ -121,15 +133,28 @@ const TourViewer = () => {
           <span className="text-sm font-semibold">{t.back}</span>
         </motion.button>
 
-        {/* Sound toggle */}
-        <motion.button
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="absolute top-6 right-6 z-30 glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors pointer-events-auto"
-          onClick={() => setSoundOn(!soundOn)}
-        >
-          {soundOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-        </motion.button>
+        {/* Top Right Buttons */}
+        <div className="absolute top-6 right-6 z-30 flex items-center gap-3 pointer-events-auto">
+          {/* Info toggle */}
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors"
+            onClick={() => setShowInfo(!showInfo)}
+          >
+            <Info className="w-5 h-5 text-accent" />
+          </motion.button>
+
+          {/* Sound toggle */}
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors"
+            onClick={() => setSoundOn(!soundOn)}
+          >
+            {soundOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+          </motion.button>
+        </div>
 
         {/* Mini-map */}
         <motion.div
@@ -162,6 +187,54 @@ const TourViewer = () => {
             <p className="text-[9px] text-accent font-display font-medium text-center uppercase tracking-widest">{parkName}</p>
           </div>
         </motion.div>
+
+        {/* Info Sidebar Overlay */}
+        <AnimatePresence>
+          {showInfo && (
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 glass-strong z-50 pointer-events-auto flex flex-col"
+            >
+              <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-display font-bold text-white">{t.infoTitle}</h2>
+                  <button 
+                    onClick={() => setShowInfo(false)}
+                    className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-6 h-6 text-white/50" />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
+                    <img 
+                      src={`/${parkId}/image1.jpg`} 
+                      alt={parkName}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+
+                  <h3 className="text-xl font-display font-semibold text-accent">{parkName}</h3>
+                  
+                  <div className="prose prose-invert prose-sm">
+                    <p className="text-white/80 leading-relaxed font-body text-base">
+                      {parkFullDesc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8 border-t border-white/5 bg-black/20">
+                <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-display">© 2026 Tashkent360</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
 
