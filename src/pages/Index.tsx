@@ -3,8 +3,10 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import ParkSelection from "@/components/ParkSelection";
 import BrandLoader from "@/components/BrandLoader";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
 
   const handleLoaderComplete = useCallback(() => {
@@ -21,7 +23,7 @@ const Index = () => {
         {/* Footer */}
         <footer className="py-12 text-center border-t border-border">
           <p className="text-muted-foreground text-sm font-body">
-            © 2026 Tashkent360. All rights reserved.
+            © 2026 Tashkent360. {t.allRightsReserved}
           </p>
         </footer>
       </div>

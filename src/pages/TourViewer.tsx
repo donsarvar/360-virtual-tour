@@ -79,8 +79,8 @@ const TourViewer = () => {
             <Html center>
               <div className="flex flex-col items-center gap-4 text-center">
                 <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                <p className="text-accent font-display tracking-[0.3em] uppercase text-xs">{parkName} 360 Yuklanmoqda...</p>
-                <p className="text-white/30 text-[10px]">Yuqori sifatli tasvir (12MB)</p>
+                <p className="text-accent font-display tracking-[0.3em] uppercase text-xs">{parkName} {t.loadingTour}</p>
+                <p className="text-white/30 text-[10px]">{t.highQualityImage}</p>
               </div>
             </Html>
           }>

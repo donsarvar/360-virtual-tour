@@ -20,6 +20,11 @@ const translations = {
     soundOn: "Ovoz yoqilgan",
     soundOff: "Ovoz o'chirilgan",
     loading: "Yuklanmoqda...",
+    loadingTour: "360 yuklanmoqda...",
+    highQualityImage: "Yuqori sifatli tasvir (12MB)",
+    tourStartMessage: "Sayohat yuklanmoqda...",
+    tayyor: "Tayyor",
+    allRightsReserved: "Barcha huquqlar himoyalangan.",
   },
   ru: {
     heroTitle: "Добро пожаловать в виртуальное путешествие",
@@ -38,6 +43,11 @@ const translations = {
     soundOn: "Звук включен",
     soundOff: "Звук выключен",
     loading: "Загрузка...",
+    loadingTour: "360 загружается...",
+    highQualityImage: "Высококачественное изображение (12МБ)",
+    tourStartMessage: "Путешествие загружается...",
+    tayyor: "Готово",
+    allRightsReserved: "Все права защищены.",
   },
   en: {
     heroTitle: "Welcome to the Virtual Journey",
@@ -56,6 +66,11 @@ const translations = {
     soundOn: "Sound on",
     soundOff: "Sound off",
     loading: "Loading...",
+    loadingTour: "360 is loading...",
+    highQualityImage: "High quality image (12MB)",
+    tourStartMessage: "Loading journey...",
+    tayyor: "Ready",
+    allRightsReserved: "All rights reserved.",
   },
 };
 
