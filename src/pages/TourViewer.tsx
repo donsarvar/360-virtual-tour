@@ -1,4 +1,4 @@
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -49,6 +49,36 @@ const TourViewer = () => {
   const [currentScene, setCurrentScene] = useState<"image1">("image1");
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Audio handling
+  useEffect(() => {
+    const audioUrls: Record<string, string> = {
+      "botanika": "/audio/Botanika bogi.m4a",
+      "islamic-center": "/audio/Islom sivilizatsiya markazi.mp3",
+      "ecopark": "/audio/Eko park.mp3",
+    };
+
+    if (soundOn && parkId && audioUrls[parkId]) {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(audioUrls[parkId]);
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.5; // Set volume to 50%
+      }
+      audioRef.current.play().catch(e => console.log("Audio play blocked by browser", e));
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [soundOn, parkId]);
 
   const getParkName = (id: string | undefined) => {
     switch (id) {
