@@ -2,14 +2,29 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
+import { MapPin, Map as MapIcon, ExternalLink } from "lucide-react";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkEcoPark from "@/assets/park-ecopark.png";
 
+const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
 const ParkSelection = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
+  const { location } = useGeoLocation();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const parks = [
@@ -18,18 +33,21 @@ const ParkSelection = () => {
       name: t.islamicCenter,
       desc: t.islamicCenterDesc,
       image: parkIslamicCenter,
+      coords: { lat: 41.338381, lng: 69.239618 }
     },
     {
       id: "botanika",
       name: t.botanika,
       desc: t.botanikaDesc,
       image: parkBotanika,
+      coords: { lat: 41.345862, lng: 69.300067 }
     },
     {
       id: "ecopark",
       name: t.ecoPark,
       desc: t.ecoParkDesc,
       image: parkEcoPark,
+      coords: { lat: 41.312151, lng: 69.288210 }
     },
   ];
 
@@ -85,14 +103,37 @@ const ParkSelection = () => {
 
                 {/* Content */}
                 <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8">
-                  <h3
-                    className="text-xl md:text-3xl font-display font-bold transition-all duration-500"
-                    style={{
-                      transform: isHovered ? "translateY(0)" : "translateY(0)",
-                    }}
-                  >
-                    {park.name}
-                  </h3>
+                  {location.coords && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-1.5 text-xs text-accent font-bold mb-3 bg-accent/10 w-fit px-3 py-1 rounded-full backdrop-blur-md border border-accent/20"
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>
+                        {t.distance} {getDistance(location.coords.latitude, location.coords.longitude, park.coords.lat, park.coords.lng).toFixed(1)} km {t.away}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-4">
+                    <h3 className="text-xl md:text-3xl font-display font-bold transition-all duration-500">
+                      {park.name}
+                    </h3>
+                    
+                    <motion.a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${park.coords.lat},${park.coords.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all border border-white/10 backdrop-blur-sm group/map"
+                      onClick={(e) => e.stopPropagation()}
+                      title={t.viewOnMap}
+                    >
+                      <MapIcon className="w-5 h-5 text-white group-hover/map:text-accent transition-colors" />
+                    </motion.a>
+                  </div>
 
                   <div
                     className="overflow-hidden transition-all duration-500"
