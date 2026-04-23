@@ -24,6 +24,7 @@ const translations = {
     highQualityImage: "Yuqori sifatli tasvir (12MB)",
     tourStartMessage: "Sayohat yuklanmoqda...",
     tayyor: "Tayyor",
+    allRightsReserved: "Barcha huquqlar himoyalangan.",
   },
   ru: {
     heroTitle: "Добро пожаловать в виртуальное путешествие",
@@ -46,6 +47,7 @@ const translations = {
     highQualityImage: "Высококачественное изображение (12МБ)",
     tourStartMessage: "Путешествие загружается...",
     tayyor: "Готово",
+    allRightsReserved: "Все права защищены.",
   },
   en: {
     heroTitle: "Welcome to the Virtual Journey",
@@ -68,6 +70,7 @@ const translations = {
     highQualityImage: "High quality image (12MB)",
     tourStartMessage: "Loading journey...",
     tayyor: "Ready",
+    allRightsReserved: "All rights reserved.",
   },
 };
 
