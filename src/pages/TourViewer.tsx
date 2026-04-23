@@ -49,6 +49,36 @@ const TourViewer = () => {
   const [currentScene, setCurrentScene] = useState<"image1">("image1");
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Audio handling
+  useEffect(() => {
+    const audioUrls: Record<string, string> = {
+      "botanika": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=forest-birds-ambience-15024.mp3",
+      "islamic-center": "https://cdn.pixabay.com/download/audio/2022/03/25/audio_c8c8a7315b.mp3?filename=meditative-flute-10175.mp3",
+      "ecopark": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_2731c3609b.mp3?filename=park-ambience-15025.mp3",
+    };
+
+    if (soundOn && parkId && audioUrls[parkId]) {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(audioUrls[parkId]);
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.5; // Set volume to 50%
+      }
+      audioRef.current.play().catch(e => console.log("Audio play blocked by browser", e));
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [soundOn, parkId]);
 
   const getParkName = (id: string | undefined) => {
     switch (id) {
