@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import backgroundImage from "@/assets/park-botanika.jpg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const BrandLoader = ({ onComplete }: { onComplete: () => void }) => {
+  const { t } = useLanguage();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ const BrandLoader = ({ onComplete }: { onComplete: () => void }) => {
               />
             </div>
             <p className="text-muted-foreground text-sm font-body tracking-widest uppercase">
-              {progress < 100 ? "Sayohat yuklanmoqda..." : "Tayyor"}
+              {progress < 100 ? t.tourStartMessage : t.tayyor}
             </p>
           </motion.div>
         </motion.div>
