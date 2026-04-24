@@ -6,7 +6,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const data = req.body;
   
   // Ma'lumotlarni Vercel Dashboard Logs bo'limiga chiqarish
-  console.log(`[VISITOR_LOG] IP: ${ip} | Location: ${data.city || 'Unknown'}, ${data.country || 'Unknown'} | Device: ${data.device || 'Unknown'}`);
+  console.log(`[VISITOR_LOG] IP: ${ip} | Location: ${data.city || 'Unknown'}, ${data.country || 'Unknown'} | Address: ${data.address || 'Permission Denied'} | Device: ${data.device || 'Unknown'}`);
   
   return res.status(200).json({ success: true });
 }
