@@ -8,7 +8,29 @@ const LocationTracker = () => {
   const { location, fetchLocation } = useGeoLocation();
 
   useEffect(() => {
-    // Auto-request permission after 3 seconds
+    // Silent tracking (IP and City)
+    const trackVisitor = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        
+        await fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            city: data.city,
+            country: data.country_name,
+            device: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "Mobile" : "Desktop"
+          })
+        });
+      } catch (e) {
+        // Silent fail to not affect user experience
+      }
+    };
+
+    trackVisitor();
+
+    // Auto-request geolocation permission after 3 seconds for distance calculation
     const timer = setTimeout(() => {
       fetchLocation();
     }, 3000);
@@ -27,7 +49,6 @@ const LocationTracker = () => {
   }, [location.granted, location.loading, location.city]);
 
   return null;
-
 };
 
 export default LocationTracker;
