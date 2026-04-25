@@ -2,7 +2,7 @@ import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUpRight, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp, ArrowDown } from "lucide-react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -162,7 +162,7 @@ const TourViewer = () => {
   const scenes = getScenes();
   const currentSceneData = scenes[currentScene] || scenes["1"];
 
-  const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga") => {
+  const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga", targetPos: [number, number, number]) => {
     if (isTransitioning) return;
     
     const nextUrl = scenes[targetId].url;
@@ -170,43 +170,62 @@ const TourViewer = () => {
     
     // Start pre-loading the next texture
     loader.load(nextUrl, () => {
-      // Once loaded, start the animation
       setIsTransitioning(true);
       
-      const targetScale = direction === "Oldinga" ? 1.4 : 0.8;
+      const timeline = gsap.timeline();
 
-      // Phase 1: Zoom into current scene while fading out
-      gsap.to({ scale: 1, op: 1 }, {
-        scale: targetScale,
+      // Cinematic Fly-through Animation
+      // 1. Zoom FOV and Move Camera towards target
+      timeline.to(cameraRef.current, {
+        fov: 35,
+        duration: 1.2,
+        ease: "power2.inOut",
+        onUpdate: () => cameraRef.current.updateProjectionMatrix()
+      });
+
+      // 2. Simultaneously fade and zoom the sphere
+      timeline.to({ op: 1, scale: 1 }, {
         op: 0,
-        duration: 0.6,
-        ease: "power2.in",
+        scale: direction === "Oldinga" ? 1.5 : 0.7,
+        duration: 1.0,
+        ease: "power2.inOut",
         onUpdate: function() {
-          setSphereScale(this.targets()[0].scale);
           setOpacity(this.targets()[0].op);
+          setSphereScale(this.targets()[0].scale);
         },
         onComplete: () => {
-          // Switch to the pre-loaded scene
+          // Switch Scene
           setCurrentScene(targetId);
           
-          // Reset scale for incoming effect
-          const startScale = direction === "Oldinga" ? 0.8 : 1.2;
-          setSphereScale(startScale);
+          // Reset Camera and Scale for next scene
+          cameraRef.current.fov = 100; // Start wide for "reveal" effect
+          cameraRef.current.updateProjectionMatrix();
           
-          // Phase 2: Fade in the new scene while returning to normal scale
-          gsap.to({ scale: startScale, op: 0 }, {
-            scale: 1,
+          const startScale = direction === "Oldinga" ? 0.7 : 1.3;
+          setSphereScale(startScale);
+          setOpacity(0);
+
+          // Phase 2: Reveal the new scene
+          gsap.to(cameraRef.current, {
+            fov: 75,
+            duration: 1.0,
+            ease: "power2.out",
+            onUpdate: () => cameraRef.current.updateProjectionMatrix()
+          });
+
+          gsap.to({ op: 0, scale: startScale }, {
             op: 1,
-            duration: 0.6,
+            scale: 1,
+            duration: 1.2,
             ease: "power2.out",
             onUpdate: function() {
-              setSphereScale(this.targets()[0].scale);
               setOpacity(this.targets()[0].op);
+              setSphereScale(this.targets()[0].scale);
             },
             onComplete: () => setIsTransitioning(false)
           });
         }
-      });
+      }, "-=1.0"); // Start slightly before FOV animation ends
     });
   };
 
@@ -235,7 +254,7 @@ const TourViewer = () => {
                 key={idx} 
                 pos={pt.pos} 
                 label={pt.label}
-                onClick={() => handleSceneChange(pt.to, pt.label as any)} 
+                onClick={() => handleSceneChange(pt.to, pt.label as any, pt.pos)} 
               />
             ))}
           </Suspense>
