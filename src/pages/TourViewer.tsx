@@ -38,34 +38,21 @@ const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onCl
           onClick={(e) => { e.stopPropagation(); onClick(); }}
           className="cursor-pointer group flex flex-col items-center gap-2"
         >
-          {/* If Oldinga, show label ABOVE */}
-          {label === "Oldinga" && (
-            <div className="glass px-4 py-1.5 rounded-full border border-white/20 transition-all">
-              <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-accent">{label}</span>
-            </div>
-          )}
+          {/* Label is always ABOVE */}
+          <div className="glass px-4 py-1.5 rounded-full border border-white/20 transition-all">
+            <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-accent">{label}</span>
+          </div>
 
-          {/* Arrow Box */}
+          {/* Arrow Box - Always pointing UP towards the label */}
           <div className="relative w-20 h-20 flex items-center justify-center">
             {/* Ground shadow/glow effect */}
             <div className="absolute inset-0 bg-accent/20 rounded-full blur-xl animate-pulse" />
             
             {/* Stylized Arrow Icon */}
             <div className="relative glass-strong p-4 rounded-2xl border-2 border-white/20 group-hover:border-accent/50 transition-all shadow-[0_0_20px_rgba(20,184,166,0.2)]">
-              {label === "Oldinga" ? (
-                <ArrowUp className="text-white w-10 h-10" />
-              ) : (
-                <ArrowDown className="text-white w-10 h-10" />
-              )}
+              <ArrowUp className="text-white w-10 h-10" />
             </div>
           </div>
-
-          {/* If Ortga, show label BELOW */}
-          {label === "Ortga" && (
-            <div className="glass px-4 py-1.5 rounded-full border border-white/20 transition-all">
-              <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-accent">{label}</span>
-            </div>
-          )}
         </motion.div>
       </Html>
     </group>
