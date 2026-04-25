@@ -13,7 +13,7 @@ import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkEcoPark from "@/assets/park-ecopark.png";
 
-const PanoramaSphere = ({ url, opacity = 1 }: { url: string; opacity?: number }) => {
+const PanoramaSphere = ({ url, opacity = 1, scale = 1 }: { url: string; opacity?: number; scale?: number }) => {
   const texture = useLoader(THREE.TextureLoader, url);
   
   // Large texture optimization
@@ -21,7 +21,7 @@ const PanoramaSphere = ({ url, opacity = 1 }: { url: string; opacity?: number })
   texture.generateMipmaps = false;
 
   return (
-    <Sphere args={[500, 128, 64]} scale={[-1, 1, 1]}>
+    <Sphere args={[500, 128, 64]} scale={[-scale, scale, scale]}>
       <meshBasicMaterial map={texture} side={THREE.BackSide} transparent opacity={opacity} />
     </Sphere>
   );
@@ -81,6 +81,7 @@ const TourViewer = () => {
   const [currentScene, setCurrentScene] = useState("1");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [opacity, setOpacity] = useState(1);
+  const [sphereScale, setSphereScale] = useState(1);
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -174,23 +175,39 @@ const TourViewer = () => {
   const scenes = getScenes();
   const currentSceneData = scenes[currentScene] || scenes["1"];
 
-  const handleSceneChange = (targetId: string) => {
+  const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga") => {
     if (isTransitioning) return;
     
     setIsTransitioning(true);
-    // Fade out
-    gsap.to({ val: 1 }, {
-      val: 0,
-      duration: 0.5,
-      onUpdate: function() { setOpacity(this.targets()[0].val); },
+    
+    // Determine scale target based on direction
+    const targetScale = direction === "Oldinga" ? 1.5 : 0.8;
+
+    // Phase 1: Zoom and Fade Out
+    gsap.to({ scale: 1, op: 1 }, {
+      scale: targetScale,
+      op: 0,
+      duration: 0.8,
+      ease: "power2.inOut",
+      onUpdate: function() {
+        setSphereScale(this.targets()[0].scale);
+        setOpacity(this.targets()[0].op);
+      },
       onComplete: () => {
         setCurrentScene(targetId);
-        // Fade in
-        gsap.to({ val: 0 }, {
-          val: 1,
-          duration: 0.5,
-          delay: 0.1,
-          onUpdate: function() { setOpacity(this.targets()[0].val); },
+        // Reset scale for incoming scene
+        setSphereScale(direction === "Oldinga" ? 0.8 : 1.2);
+        
+        // Phase 2: Zoom in/out to Normal and Fade In
+        gsap.to({ scale: direction === "Oldinga" ? 0.8 : 1.2, op: 0 }, {
+          scale: 1,
+          op: 1,
+          duration: 0.8,
+          ease: "power2.out",
+          onUpdate: function() {
+            setSphereScale(this.targets()[0].scale);
+            setOpacity(this.targets()[0].op);
+          },
           onComplete: () => setIsTransitioning(false)
         });
       }
@@ -214,7 +231,7 @@ const TourViewer = () => {
               </div>
             </Html>
           }>
-            <PanoramaSphere url={currentSceneData.url} opacity={opacity} />
+            <PanoramaSphere url={currentSceneData.url} opacity={opacity} scale={sphereScale} />
             
             {/* Render Navigation Points */}
             {!isTransitioning && currentSceneData.navPoints?.map((pt: any, idx: number) => (
@@ -222,7 +239,7 @@ const TourViewer = () => {
                 key={idx} 
                 pos={pt.pos} 
                 label={pt.label}
-                onClick={() => handleSceneChange(pt.to)} 
+                onClick={() => handleSceneChange(pt.to, pt.label as any)} 
               />
             ))}
           </Suspense>
