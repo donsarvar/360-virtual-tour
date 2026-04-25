@@ -46,8 +46,9 @@ const TourViewer = () => {
   const { t } = useLanguage();
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [currentScene, setCurrentScene] = useState<"image1">("image1");
-  const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
+  const [currentScene, setCurrentScene] = useState("1");
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [opacity, setOpacity] = useState(1);
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -113,16 +114,56 @@ const TourViewer = () => {
 
   const parkImage = getParkImage(parkId);
 
-  const scenes = {
-    image1: {
-      url: `/${parkId}/image1.jpg`,
-      infoSpots: [
-        { x: 30, y: 45, title: "Nuqta 1", desc: "Bu hudud haqida ma'lumotlar yaqinda qo'shiladi." },
-      ],
-    },
+  // Dynamic Scene Generation for Botanika (1-19)
+  const getScenes = () => {
+    if (parkId === "botanika") {
+      const botanikaScenes: Record<string, any> = {};
+      for (let i = 1; i <= 19; i++) {
+        botanikaScenes[i.toString()] = {
+          url: `/botanika/${i}.jpg`,
+          navPoints: [
+            ...(i < 19 ? [{ to: (i + 1).toString(), pos: [100, -50, 0] as [number, number, number] }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -50, 0] as [number, number, number] }] : []),
+          ]
+        };
+      }
+      return botanikaScenes;
+    }
+
+    // Default scenes for other parks
+    return {
+      "1": {
+        url: `/${parkId}/image1.jpg`,
+        navPoints: []
+      },
+    };
   };
 
-  const spots = scenes[currentScene].infoSpots;
+  const scenes = getScenes();
+  const currentSceneData = scenes[currentScene] || scenes["1"];
+
+  const handleSceneChange = (targetId: string) => {
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
+    // Fade out
+    gsap.to({ val: 1 }, {
+      val: 0,
+      duration: 0.5,
+      onUpdate: function() { setOpacity(this.targets()[0].val); },
+      onComplete: () => {
+        setCurrentScene(targetId);
+        // Fade in
+        gsap.to({ val: 0 }, {
+          val: 1,
+          duration: 0.5,
+          delay: 0.1,
+          onUpdate: function() { setOpacity(this.targets()[0].val); },
+          onComplete: () => setIsTransitioning(false)
+        });
+      }
+    });
+  };
 
   const [yaw, setYaw] = useState(0);
 
@@ -141,7 +182,16 @@ const TourViewer = () => {
               </div>
             </Html>
           }>
-            <PanoramaSphere url={scenes[currentScene].url} opacity={1} />
+            <PanoramaSphere url={currentSceneData.url} opacity={opacity} />
+            
+            {/* Render Navigation Points */}
+            {!isTransitioning && currentSceneData.navPoints?.map((pt: any, idx: number) => (
+              <NavPoint 
+                key={idx} 
+                pos={pt.pos} 
+                onClick={() => handleSceneChange(pt.to)} 
+              />
+            ))}
           </Suspense>
           <OrbitControls 
             enableZoom={false} 
