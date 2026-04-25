@@ -2,7 +2,7 @@ import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUpRight, ArrowUp, ArrowDown } from "lucide-react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -28,8 +28,6 @@ const PanoramaSphere = ({ url, opacity = 1 }: { url: string; opacity?: number })
 };
 
 const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onClick: () => void; label: string }) => {
-  const { ArrowUp, ArrowDown } = require("lucide-react");
-  
   return (
     <group position={pos}>
       <Html center>
