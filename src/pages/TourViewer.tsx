@@ -178,39 +178,48 @@ const TourViewer = () => {
   const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga") => {
     if (isTransitioning) return;
     
-    setIsTransitioning(true);
+    const nextUrl = scenes[targetId].url;
+    const loader = new THREE.TextureLoader();
     
-    // Determine scale target based on direction
-    const targetScale = direction === "Oldinga" ? 1.5 : 0.8;
+    // Start pre-loading the next texture
+    loader.load(nextUrl, () => {
+      // Once loaded, start the animation
+      setIsTransitioning(true);
+      
+      const targetScale = direction === "Oldinga" ? 1.4 : 0.8;
 
-    // Phase 1: Zoom and Fade Out
-    gsap.to({ scale: 1, op: 1 }, {
-      scale: targetScale,
-      op: 0,
-      duration: 0.8,
-      ease: "power2.inOut",
-      onUpdate: function() {
-        setSphereScale(this.targets()[0].scale);
-        setOpacity(this.targets()[0].op);
-      },
-      onComplete: () => {
-        setCurrentScene(targetId);
-        // Reset scale for incoming scene
-        setSphereScale(direction === "Oldinga" ? 0.8 : 1.2);
-        
-        // Phase 2: Zoom in/out to Normal and Fade In
-        gsap.to({ scale: direction === "Oldinga" ? 0.8 : 1.2, op: 0 }, {
-          scale: 1,
-          op: 1,
-          duration: 0.8,
-          ease: "power2.out",
-          onUpdate: function() {
-            setSphereScale(this.targets()[0].scale);
-            setOpacity(this.targets()[0].op);
-          },
-          onComplete: () => setIsTransitioning(false)
-        });
-      }
+      // Phase 1: Zoom into current scene while fading out
+      gsap.to({ scale: 1, op: 1 }, {
+        scale: targetScale,
+        op: 0,
+        duration: 0.6,
+        ease: "power2.in",
+        onUpdate: function() {
+          setSphereScale(this.targets()[0].scale);
+          setOpacity(this.targets()[0].op);
+        },
+        onComplete: () => {
+          // Switch to the pre-loaded scene
+          setCurrentScene(targetId);
+          
+          // Reset scale for incoming effect
+          const startScale = direction === "Oldinga" ? 0.8 : 1.2;
+          setSphereScale(startScale);
+          
+          // Phase 2: Fade in the new scene while returning to normal scale
+          gsap.to({ scale: startScale, op: 0 }, {
+            scale: 1,
+            op: 1,
+            duration: 0.6,
+            ease: "power2.out",
+            onUpdate: function() {
+              setSphereScale(this.targets()[0].scale);
+              setOpacity(this.targets()[0].op);
+            },
+            onComplete: () => setIsTransitioning(false)
+          });
+        }
+      });
     });
   };
 
