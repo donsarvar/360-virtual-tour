@@ -27,15 +27,34 @@ const PanoramaSphere = ({ url, opacity = 1 }: { url: string; opacity?: number })
   );
 };
 
-const NavPoint = ({ pos, onClick }: { pos: [number, number, number]; onClick: () => void }) => (
+const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onClick: () => void; label: string }) => (
   <group position={pos}>
     <Html center>
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ scale: 1.1 }}
         onClick={(e) => { e.stopPropagation(); onClick(); }}
-        className="cursor-pointer w-12 h-12 rounded-full border-4 border-white bg-accent/20 backdrop-blur-sm flex items-center justify-center animate-pulse hover:scale-125 transition-transform"
+        className="cursor-pointer group flex flex-col items-center gap-2"
       >
-        <ArrowUpRight className="text-white w-6 h-6" />
-      </div>
+        {/* Direction Label */}
+        <div className="glass px-4 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-y-2">
+          <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-accent">{label}</span>
+        </div>
+
+        {/* Professional Ground Arrow */}
+        <div className="relative w-20 h-20 flex items-center justify-center">
+          {/* Ground shadow/glow effect */}
+          <div className="absolute inset-0 bg-accent/20 rounded-full blur-xl animate-pulse" />
+          
+          {/* Stylized Arrow Icon */}
+          <div className="relative glass-strong p-4 rounded-2xl border-2 border-white/20 transform rotate-[45deg] group-hover:border-accent/50 transition-all shadow-[0_0_20px_rgba(20,184,166,0.2)]">
+            <ArrowUpRight 
+              className={`text-white w-10 h-10 transform -rotate-[45deg] ${label === "Ortga" ? "rotate-[135deg]" : ""}`} 
+            />
+          </div>
+        </div>
+      </motion.div>
     </Html>
   </group>
 );
@@ -122,8 +141,8 @@ const TourViewer = () => {
         botanikaScenes[i.toString()] = {
           url: `/botanika/${i}.jpg`,
           navPoints: [
-            ...(i < 19 ? [{ to: (i + 1).toString(), pos: [100, -50, 0] as [number, number, number] }] : []),
-            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -50, 0] as [number, number, number] }] : []),
+            ...(i < 19 ? [{ to: (i + 1).toString(), pos: [100, -60, 0] as [number, number, number], label: "Oldinga" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -60, 0] as [number, number, number], label: "Ortga" }] : []),
           ]
         };
       }
@@ -189,6 +208,7 @@ const TourViewer = () => {
               <NavPoint 
                 key={idx} 
                 pos={pt.pos} 
+                label={pt.label}
                 onClick={() => handleSceneChange(pt.to)} 
               />
             ))}
