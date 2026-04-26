@@ -224,16 +224,30 @@ const TourViewer = () => {
           </motion.div>
         </div>
 
-        {/* Mini-Map (Bottom Right) */}
-        <motion.div className="absolute bottom-8 right-8 z-30 glass-strong rounded-2xl overflow-hidden w-48 h-36 border border-white/10 shadow-2xl">
-          <div className="w-full h-full flex items-center justify-center relative bg-black/40">
-            <div className="w-28 h-28 rounded-full border border-dashed border-accent/30 absolute animate-spin-slow" />
-            <motion.div style={{ rotate: yaw }} className="relative flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]"><MapPin className="w-6 h-6 text-accent" /></div>
-              <div className="absolute -top-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-accent drop-shadow-glow" />
-            </motion.div>
+        {/* Real-Map Navigation (Bottom Right) */}
+        <motion.div className="absolute bottom-8 right-8 z-30 glass-strong rounded-2xl overflow-hidden w-52 h-40 border border-white/10 shadow-2xl">
+          <div className="w-full h-full relative bg-black/40 overflow-hidden">
+            {/* The Topographic Map Image */}
+            <img 
+              src={`/maps/${parkId}.png`} 
+              alt="Park Map" 
+              className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen"
+            />
+            
+            {/* The Rotating Compass Indicator */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full border border-white/5 absolute" />
+              <motion.div style={{ rotate: yaw }} className="relative flex items-center justify-center scale-110">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]">
+                  <MapPin className="w-6 h-6 text-accent" />
+                </div>
+                <div className="absolute -top-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-accent drop-shadow-[0_0_8px_rgba(20,184,166,0.8)]" />
+              </motion.div>
+            </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-2 py-2 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[9px] text-accent font-bold">{getParkName()}</div>
+          <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-2 py-2 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[9px] text-accent font-bold">
+            {getParkName()}
+          </div>
         </motion.div>
 
         {/* Info Sidebar */}
