@@ -10,7 +10,7 @@ if (!fs.existsSync(destDir)) {
 }
 
 async function convert() {
-    console.log('Starting conversion to WebP...');
+    console.log('Starting RADICAL optimization (4K resolution, 60% quality)...');
     for (let i = 1; i <= 17; i++) {
         const sourceFile = path.join(sourceDir, `${i}.jpg`);
         const destFile = path.join(destDir, `${i}.webp`);
@@ -18,17 +18,16 @@ async function convert() {
         if (fs.existsSync(sourceFile)) {
             try {
                 await sharp(sourceFile)
-                    .webp({ quality: 80 }) // 80% quality is perfect for 360 photos
+                    .resize(4096, 2048, { fit: 'fill' }) // Resize to 4K (Standard for Web 360)
+                    .webp({ quality: 60, effort: 6 }) // Lower quality for extreme speed
                     .toFile(destFile);
-                console.log(`Converted: ${i}.jpg -> ${i}.webp`);
+                console.log(`Optimized: ${i}.jpg -> ${i}.webp (~1MB target)`);
             } catch (err) {
-                console.error(`Error converting ${i}.jpg:`, err);
+                console.error(`Error on ${i}.jpg:`, err);
             }
-        } else {
-            console.warn(`File not found: ${sourceFile}`);
         }
     }
-    console.log('Conversion completed!');
+    console.log('Radical optimization completed!');
 }
 
 convert();

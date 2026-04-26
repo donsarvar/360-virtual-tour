@@ -108,7 +108,7 @@ const TourViewer = () => {
       const botanikaScenes: Record<string, any> = {};
       for (let i = 1; i <= 17; i++) {
         botanikaScenes[i.toString()] = {
-          url: `/botanika/${i}.webp?v=3`,
+          url: `/botanika/${i}.webp?v=4`,
           navPoints: [
             ...(i < 17 ? [{ to: (i + 1).toString(), pos: [100, -60, 0] as [number, number, number], label: "Oldinga" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -60, 0] as [number, number, number], label: "Ortga" }] : []),
