@@ -8,8 +8,12 @@ import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/dre
 import * as THREE from "three";
 import { gsap } from "gsap";
 import LocationTracker from "@/components/LocationTracker";
+import BrandLoader from "@/components/BrandLoader";
 
-// Optimized Sphere
+import parkBotanika from "@/assets/park-botanika.jpg";
+import parkIslamicCenter from "@/assets/park-islamic-center.png";
+import parkEcoPark from "@/assets/park-ecopark.png";
+
 const PanoramaSphere = ({ texture, opacity = 1, scale = 1 }: { texture: THREE.Texture | null; opacity?: number; scale?: number }) => {
   if (!texture) return null;
   return (
@@ -19,7 +23,6 @@ const PanoramaSphere = ({ texture, opacity = 1, scale = 1 }: { texture: THREE.Te
   );
 };
 
-// Reverting to the previous Glassmorphic Floating NavPoint
 const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onClick: () => void; label: string }) => {
   return (
     <group position={pos}>
@@ -52,6 +55,7 @@ const TourViewer = () => {
   const { t } = useLanguage();
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   
   const [textureA, setTextureA] = useState<THREE.Texture | null>(null);
   const [textureB, setTextureB] = useState<THREE.Texture | null>(null);
@@ -73,6 +77,7 @@ const TourViewer = () => {
       tex.minFilter = THREE.LinearFilter;
       tex.generateMipmaps = false;
       setTextureA(tex);
+      setTimeout(() => setIsInitialLoading(false), 500); // Small buffer for smoothness
     });
   }, [parkId]);
 
@@ -94,6 +99,15 @@ const TourViewer = () => {
 
     return () => { if (audioRef.current) audioRef.current.pause(); };
   }, [soundOn, parkId]);
+
+  const getParkName = () => {
+    switch (parkId) {
+      case "botanika": return "Botanika Bog'i";
+      case "islamic-center": return "Islom Sivilizatsiyasi Markazi";
+      case "ecopark": return "Eko Park";
+      default: return "Park";
+    }
+  };
 
   const getScenes = () => {
     if (parkId === "botanika") {
@@ -175,6 +189,10 @@ const TourViewer = () => {
 
   const [yaw, setYaw] = useState(0);
 
+  if (isInitialLoading) {
+    return <BrandLoader />;
+  }
+
   return (
     <div className="fixed inset-0 bg-black">
       <div className="absolute inset-0 z-0">
@@ -193,7 +211,6 @@ const TourViewer = () => {
         </Canvas>
       </div>
 
-      {/* UI Overlay */}
       <div className="absolute inset-0 pointer-events-none z-10 font-display">
         <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-6 z-30 glass rounded-full px-5 py-2.5 flex items-center gap-2 text-white pointer-events-auto" onClick={() => navigate("/")}>
           <ArrowLeft className="w-4 h-4" />
@@ -220,7 +237,7 @@ const TourViewer = () => {
               <img 
                 src={parkId === "botanika" ? parkBotanika : parkId === "islamic-center" ? parkIslamicCenter : parkEcoPark} 
                 alt={getParkName()} 
-                className="w-full h-52 object-cover rounded-2xl shadow-xl border border-white/10"
+                className="w-full h-56 object-cover rounded-2xl shadow-xl border border-white/10"
               />
               <div className="prose prose-invert prose-sm">
                 <p className="text-white/70 leading-relaxed text-lg font-body">
