@@ -2,7 +2,7 @@ import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp, ArrowDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -14,38 +14,13 @@ import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkEcoPark from "@/assets/park-ecopark.png";
 
+// Optimized Sphere
 const PanoramaSphere = ({ texture, opacity = 1, scale = 1 }: { texture: THREE.Texture | null; opacity?: number; scale?: number }) => {
   if (!texture) return null;
   return (
     <Sphere args={[500, 64, 32]} scale={[-scale, scale, scale]}>
       <meshBasicMaterial map={texture} side={THREE.BackSide} transparent opacity={opacity} depthTest={false} />
     </Sphere>
-  );
-};
-
-const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onClick: () => void; label: string }) => {
-  return (
-    <group position={pos}>
-      <Html center>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          className="cursor-pointer group flex flex-col items-center gap-2"
-        >
-          <div className="glass px-4 py-1.5 rounded-full border border-white/20 shadow-xl">
-            <span className="text-[11px] font-display font-bold uppercase tracking-[0.2em] text-white">{label}</span>
-          </div>
-          <div className="relative w-20 h-20 flex items-center justify-center">
-            <div className="absolute inset-0 bg-accent/20 rounded-full blur-xl animate-pulse" />
-            <div className="relative glass-strong p-4 rounded-2xl border-2 border-white/20 group-hover:border-accent/50 transition-all shadow-[0_0_20px_rgba(20,184,166,0.2)]">
-              <ArrowUp className="text-white w-10 h-10" />
-            </div>
-          </div>
-        </motion.div>
-      </Html>
-    </group>
   );
 };
 
@@ -77,7 +52,7 @@ const TourViewer = () => {
       tex.minFilter = THREE.LinearFilter;
       tex.generateMipmaps = false;
       setTextureA(tex);
-      setTimeout(() => setIsInitialLoading(false), 500); // Small buffer for smoothness
+      setTimeout(() => setIsInitialLoading(false), 500);
     });
   }, [parkId]);
 
@@ -116,8 +91,8 @@ const TourViewer = () => {
         botanikaScenes[i.toString()] = {
           url: `/botanika/${i}.webp?v=4`,
           navPoints: [
-            ...(i < 17 ? [{ to: (i + 1).toString(), pos: [100, -60, 0] as [number, number, number], label: "OLDINGA" }] : []),
-            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -60, 0] as [number, number, number], label: "ORTGA" }] : []),
+            ...(i < 17 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
           ]
         };
       }
@@ -193,6 +168,9 @@ const TourViewer = () => {
     return <BrandLoader />;
   }
 
+  const forwardPoint = currentSceneData?.navPoints?.find((p: any) => p.label === "OLDINGA");
+  const backwardPoint = currentSceneData?.navPoints?.find((p: any) => p.label === "ORTGA");
+
   return (
     <div className="fixed inset-0 bg-black">
       <div className="absolute inset-0 z-0">
@@ -201,9 +179,6 @@ const TourViewer = () => {
           <group>
             <PanoramaSphere texture={textureA} opacity={opacityA} scale={activeBuffer === "A" ? sphereScale : 1} />
             <PanoramaSphere texture={textureB} opacity={opacityB} scale={activeBuffer === "B" ? sphereScale : 1} />
-            {!isTransitioning && currentSceneData?.navPoints?.map((pt: any, idx: number) => (
-              <NavPoint key={`${currentSceneId}-${idx}`} pos={pt.pos} label={pt.label} onClick={() => handleSceneChange(pt.to, pt.label as any)} />
-            ))}
           </group>
           <OrbitControls enableZoom={false} enablePan={false} enableDamping dampingFactor={0.05} rotateSpeed={-0.4} onChange={(e) => {
             if (e?.target?.object) setYaw(e.target.object.rotation.y * (180 / Math.PI));
@@ -212,6 +187,7 @@ const TourViewer = () => {
       </div>
 
       <div className="absolute inset-0 pointer-events-none z-10 font-display">
+        {/* Top Buttons */}
         <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-6 z-30 glass rounded-full px-5 py-2.5 flex items-center gap-2 text-white pointer-events-auto" onClick={() => navigate("/")}>
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm font-semibold tracking-wider">{t.back}</span>
@@ -220,6 +196,35 @@ const TourViewer = () => {
           <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setShowInfo(!showInfo)}><Info className="w-5 h-5 text-accent" /></motion.button>
           <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setSoundOn(!soundOn)}>{soundOn ? <Volume2 className="w-5 h-5 text-white" /> : <VolumeX className="w-5 h-5 text-white" />}</motion.button>
         </div>
+
+        {/* Central Navigation Hub (Bottom Center) */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center gap-4">
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="glass-strong rounded-3xl p-2 flex items-center gap-2 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+          >
+            <button
+              disabled={!backwardPoint || isTransitioning}
+              onClick={() => backwardPoint && handleSceneChange(backwardPoint.to, "ORTGA")}
+              className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!backwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}
+            >
+              <ChevronDown className="w-6 h-6 text-white" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">ORTGA</span>
+            </button>
+            <div className="w-[1px] h-10 bg-white/10" />
+            <button
+              disabled={!forwardPoint || isTransitioning}
+              onClick={() => forwardPoint && handleSceneChange(forwardPoint.to, "OLDINGA")}
+              className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!forwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}
+            >
+              <ChevronUp className="w-6 h-6 text-accent animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-accent">OLDINGA</span>
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Mini-Map (Bottom Right) */}
         <motion.div className="absolute bottom-8 right-8 z-30 glass-strong rounded-2xl overflow-hidden w-48 h-36 border border-white/10 shadow-2xl">
           <div className="w-full h-full flex items-center justify-center relative bg-black/40">
             <div className="w-28 h-28 rounded-full border border-dashed border-accent/30 absolute animate-spin-slow" />
@@ -228,24 +233,18 @@ const TourViewer = () => {
               <div className="absolute -top-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-accent drop-shadow-glow" />
             </motion.div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-2 py-2 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[9px] text-accent font-bold">{parkId === "botanika" ? "Botanika Bog'i" : "Park"}</div>
+          <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-2 py-2 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[9px] text-accent font-bold">{getParkName()}</div>
         </motion.div>
+
+        {/* Info Sidebar */}
         <AnimatePresence>{showInfo && (
           <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 glass-strong z-50 pointer-events-auto flex flex-col p-10 border-l border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-10"><h2 className="text-2xl font-bold text-white tracking-tight">{t.infoTitle}</h2><button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X className="w-6 h-6 text-white/50" /></button></div>
             <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
-              <img 
-                src={parkId === "botanika" ? parkBotanika : parkId === "islamic-center" ? parkIslamicCenter : parkEcoPark} 
-                alt={getParkName()} 
-                className="w-full h-56 object-cover rounded-2xl shadow-xl border border-white/10"
-              />
+              <img src={parkId === "botanika" ? parkBotanika : parkId === "islamic-center" ? parkIslamicCenter : parkEcoPark} alt={getParkName()} className="w-full h-56 object-cover rounded-2xl shadow-xl border border-white/10" />
               <div className="prose prose-invert prose-sm">
                 <p className="text-white/70 leading-relaxed text-lg font-body">
-                  {parkId === "botanika" 
-                    ? t.botanikaFullDesc 
-                    : parkId === "islamic-center" 
-                      ? t.islamicCenterFullDesc 
-                      : t.ecoParkFullDesc}
+                  {parkId === "botanika" ? t.botanikaFullDesc : parkId === "islamic-center" ? t.islamicCenterFullDesc : t.ecoParkFullDesc}
                 </p>
               </div>
             </div>
