@@ -132,33 +132,29 @@ const TourViewer = () => {
   const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga") => {
     if (isTransitioning) return;
     
+    setIsTransitioning(true);
     const nextUrl = scenes[targetId]?.url;
     if (!nextUrl) return;
 
+    const timeline = gsap.timeline();
+
+    // 1. INSTANT FEEDBACK: Start Zooming immediately
+    timeline.to(cameraRef.current, {
+      fov: 38,
+      duration: 1.5, // Slightly longer zoom to mask loading
+      ease: "power2.inOut",
+      onUpdate: () => cameraRef.current.updateProjectionMatrix()
+    });
+
+    // 2. Start Loading in parallel
     const loader = new THREE.TextureLoader();
     loader.load(nextUrl, () => {
-      setIsTransitioning(true);
-      
-      if (activeBuffer === "A") {
-        setSceneB(targetId);
-      } else {
-        setSceneA(targetId);
-      }
-
-      const timeline = gsap.timeline();
-
-      timeline.to(cameraRef.current, {
-        fov: 40,
-        duration: 0.8,
-        ease: "power2.inOut",
-        onUpdate: () => cameraRef.current.updateProjectionMatrix()
-      });
-
+      // Once loaded, perform the cross-fade
       timeline.to({ opA: opacityA, opB: opacityB, scale: 1 }, {
         opA: activeBuffer === "A" ? 0 : 1,
         opB: activeBuffer === "A" ? 1 : 0,
-        scale: direction === "Oldinga" ? 1.3 : 0.8,
-        duration: 1.0,
+        scale: direction === "Oldinga" ? 1.4 : 0.7,
+        duration: 0.8,
         ease: "power2.inOut",
         onUpdate: function() {
           const targets = this.targets()[0];
@@ -166,19 +162,25 @@ const TourViewer = () => {
           setOpacityB(targets.opB);
           setSphereScale(targets.scale);
         },
+        onStart: () => {
+          // Switch scene ID in the hidden buffer right before fade starts
+          if (activeBuffer === "A") setSceneB(targetId);
+          else setSceneA(targetId);
+        },
         onComplete: () => {
           setActiveBuffer(activeBuffer === "A" ? "B" : "A");
           
+          // Reset FOV and Scale
           gsap.to(cameraRef.current, {
             fov: 75,
-            duration: 0.8,
+            duration: 1.0,
             ease: "power2.out",
             onUpdate: () => cameraRef.current.updateProjectionMatrix()
           });
 
           gsap.to({ scale: sphereScale }, {
             scale: 1,
-            duration: 0.8,
+            duration: 1.0,
             ease: "power2.out",
             onUpdate: function() {
               setSphereScale(this.targets()[0].scale);
@@ -186,7 +188,7 @@ const TourViewer = () => {
             onComplete: () => setIsTransitioning(false)
           });
         }
-      }, "-=0.4");
+      }, "-=0.5"); // Start fading while zoom is still finishing
     });
   };
 
