@@ -241,7 +241,11 @@ const TourViewer = () => {
               />
               <div className="prose prose-invert prose-sm">
                 <p className="text-white/70 leading-relaxed text-lg font-body">
-                  {parkId === "botanika" ? t.botanikaFullDesc : t.ecoParkFullDesc}
+                  {parkId === "botanika" 
+                    ? t.botanikaFullDesc 
+                    : parkId === "islamic-center" 
+                      ? t.islamicCenterFullDesc 
+                      : t.ecoParkFullDesc}
                 </p>
               </div>
             </div>
