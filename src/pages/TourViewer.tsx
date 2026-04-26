@@ -185,13 +185,13 @@ const TourViewer = () => {
         {/* Navigation Hub - Hidden when Map is open on Mobile */}
         <AnimatePresence>
           {!showMap && (
-            <motion.div 
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center gap-4"
-            >
-              <div className="glass-strong rounded-3xl p-2 flex items-center gap-2 border border-white/10 shadow-2xl">
+            <div className="absolute bottom-10 left-0 right-0 z-40 pointer-events-auto flex justify-center px-6">
+              <motion.div 
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 50, opacity: 0 }}
+                className="glass-strong rounded-3xl p-2 flex items-center gap-2 border border-white/10 shadow-2xl"
+              >
                 <button disabled={!backwardPoint || isTransitioning} onClick={() => backwardPoint && handleSceneChange(backwardPoint.to, "ORTGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!backwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
                   <ChevronDown className="w-6 h-6 text-white" /><span className="text-[10px] font-bold uppercase tracking-widest text-white/70">ORTGA</span>
                 </button>
@@ -199,8 +199,8 @@ const TourViewer = () => {
                 <button disabled={!forwardPoint || isTransitioning} onClick={() => forwardPoint && handleSceneChange(forwardPoint.to, "OLDINGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!forwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
                   <ChevronUp className="w-6 h-6 text-accent animate-pulse" /><span className="text-[10px] font-bold uppercase tracking-widest text-accent">OLDINGA</span>
                 </button>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
