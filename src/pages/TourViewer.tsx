@@ -2,43 +2,49 @@ import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUpRight } from "lucide-react";
-import { Canvas, useLoader } from "@react-three/fiber";
+import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp } from "lucide-react";
+import { Canvas } from "@react-three/fiber";
 import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 import { gsap } from "gsap";
 import LocationTracker from "@/components/LocationTracker";
 
-import parkBotanika from "@/assets/park-botanika.jpg";
-import parkIslamicCenter from "@/assets/park-islamic-center.png";
-import parkEcoPark from "@/assets/park-ecopark.png";
-
-const PanoramaSphere = ({ url, opacity = 1 }: { url: string; opacity?: number }) => {
-  const texture = useLoader(THREE.TextureLoader, url);
-  
-  // Large texture optimization
-  texture.minFilter = THREE.LinearFilter;
-  texture.generateMipmaps = false;
-
+// Optimized Sphere
+const PanoramaSphere = ({ texture, opacity = 1, scale = 1 }: { texture: THREE.Texture | null; opacity?: number; scale?: number }) => {
+  if (!texture) return null;
   return (
-    <Sphere args={[500, 128, 64]} scale={[-1, 1, 1]}>
-      <meshBasicMaterial map={texture} side={THREE.BackSide} transparent opacity={opacity} />
+    <Sphere args={[500, 64, 32]} scale={[-scale, scale, scale]}>
+      <meshBasicMaterial map={texture} side={THREE.BackSide} transparent opacity={opacity} depthTest={false} />
     </Sphere>
   );
 };
 
-const NavPoint = ({ pos, onClick }: { pos: [number, number, number]; onClick: () => void }) => (
-  <group position={pos}>
-    <Html center>
-      <div
-        onClick={(e) => { e.stopPropagation(); onClick(); }}
-        className="cursor-pointer w-12 h-12 rounded-full border-4 border-white bg-accent/20 backdrop-blur-sm flex items-center justify-center animate-pulse hover:scale-125 transition-transform"
-      >
-        <ArrowUpRight className="text-white w-6 h-6" />
-      </div>
-    </Html>
-  </group>
-);
+// Reverting to the previous Glassmorphic Floating NavPoint
+const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onClick: () => void; label: string }) => {
+  return (
+    <group position={pos}>
+      <Html center>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          className="cursor-pointer group flex flex-col items-center gap-2"
+        >
+          <div className="glass px-4 py-1.5 rounded-full border border-white/20 shadow-xl">
+            <span className="text-[11px] font-display font-bold uppercase tracking-[0.2em] text-white">{label}</span>
+          </div>
+          <div className="relative w-20 h-20 flex items-center justify-center">
+            <div className="absolute inset-0 bg-accent/20 rounded-full blur-xl animate-pulse" />
+            <div className="relative glass-strong p-4 rounded-2xl border-2 border-white/20 group-hover:border-accent/50 transition-all shadow-[0_0_20px_rgba(20,184,166,0.2)]">
+              <ArrowUp className="text-white w-10 h-10" />
+            </div>
+          </div>
+        </motion.div>
+      </Html>
+    </group>
+  );
+};
 
 const TourViewer = () => {
   const { parkId } = useParams();
@@ -46,12 +52,30 @@ const TourViewer = () => {
   const { t } = useLanguage();
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [currentScene, setCurrentScene] = useState<"image1">("image1");
-  const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
+  
+  const [textureA, setTextureA] = useState<THREE.Texture | null>(null);
+  const [textureB, setTextureB] = useState<THREE.Texture | null>(null);
+  const [activeBuffer, setActiveBuffer] = useState<"A" | "B">("A");
+  
+  const [currentSceneId, setCurrentSceneId] = useState("1");
+  const [opacityA, setOpacityA] = useState(1);
+  const [opacityB, setOpacityB] = useState(0);
+  const [sphereScale, setSphereScale] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const textureLoader = useRef(new THREE.TextureLoader());
 
-  // Audio handling
+  useEffect(() => {
+    const initialUrl = getScenes()["1"].url;
+    textureLoader.current.load(initialUrl, (tex) => {
+      tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      setTextureA(tex);
+    });
+  }, [parkId]);
+
   useEffect(() => {
     const audioUrls: Record<string, string> = {
       "botanika": "/audio/Botanika bogi.m4a",
@@ -63,231 +87,142 @@ const TourViewer = () => {
       if (!audioRef.current) {
         audioRef.current = new Audio(audioUrls[parkId]);
         audioRef.current.loop = true;
-        audioRef.current.volume = 0.5; // Set volume to 50%
+        audioRef.current.volume = 0.5;
       }
-      audioRef.current.play().catch(e => console.log("Audio play blocked by browser", e));
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    }
+      audioRef.current.play().catch(() => {});
+    } else if (audioRef.current) audioRef.current.pause();
 
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
+    return () => { if (audioRef.current) audioRef.current.pause(); };
   }, [soundOn, parkId]);
 
-  const getParkName = (id: string | undefined) => {
-    switch (id) {
-      case "botanika": return "Botanika Bog'i";
-      case "islamic-center": return "Islom Sivilizatsiyasi Markazi";
-      case "ecopark": return "Eko Park";
-      default: return "Park";
+  const getScenes = () => {
+    if (parkId === "botanika") {
+      const botanikaScenes: Record<string, any> = {};
+      for (let i = 1; i <= 17; i++) {
+        botanikaScenes[i.toString()] = {
+          url: `/botanika/${i}.webp?v=4`,
+          navPoints: [
+            ...(i < 17 ? [{ to: (i + 1).toString(), pos: [100, -60, 0] as [number, number, number], label: "OLDINGA" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -60, 0] as [number, number, number], label: "ORTGA" }] : []),
+          ]
+        };
+      }
+      return botanikaScenes;
     }
+    return { "1": { url: `/${parkId}/image1.jpg`, navPoints: [] } };
   };
 
-  const parkName = getParkName(parkId);
+  const scenes = getScenes();
+  const currentSceneData = scenes[currentSceneId] || scenes["1"];
 
-  const getParkFullDesc = (id: string | undefined) => {
-    switch (id) {
-      case "botanika": return t.botanikaFullDesc;
-      case "islamic-center": return t.islamicCenterFullDesc;
-      case "ecopark": return t.ecoParkFullDesc;
-      default: return "";
-    }
+  const handleSceneChange = (targetId: string, direction: "OLDINGA" | "ORTGA") => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    
+    const nextUrl = scenes[targetId]?.url;
+    if (!nextUrl) { setIsTransitioning(false); return; }
+
+    gsap.to(cameraRef.current, {
+      fov: 35,
+      duration: 1.2,
+      ease: "power2.inOut",
+      onUpdate: () => cameraRef.current.updateProjectionMatrix()
+    });
+
+    textureLoader.current.load(nextUrl, (tex) => {
+      tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+
+      if (activeBuffer === "A") setTextureB(tex);
+      else setTextureA(tex);
+
+      gsap.to({ opA: opacityA, opB: opacityB, scale: 1 }, {
+        opA: activeBuffer === "A" ? 0 : 1,
+        opB: activeBuffer === "A" ? 1 : 0,
+        scale: direction === "OLDINGA" ? 1.4 : 0.7,
+        duration: 0.8,
+        ease: "power2.inOut",
+        onUpdate: function() {
+          const t = this.targets()[0];
+          setOpacityA(t.opA);
+          setOpacityB(t.opB);
+          setSphereScale(t.scale);
+        },
+        onComplete: () => {
+          setActiveBuffer(activeBuffer === "A" ? "B" : "A");
+          setCurrentSceneId(targetId);
+          
+          gsap.to(cameraRef.current, {
+            fov: 75,
+            duration: 1.0,
+            ease: "power2.out",
+            onUpdate: () => cameraRef.current.updateProjectionMatrix()
+          });
+
+          gsap.to({ scale: sphereScale }, {
+            scale: 1,
+            duration: 1.0,
+            ease: "power2.out",
+            onUpdate: function() {
+              setSphereScale(this.targets()[0].scale);
+            },
+            onComplete: () => setIsTransitioning(false)
+          });
+        }
+      });
+    });
   };
-
-  const parkFullDesc = getParkFullDesc(parkId);
-
-  const getParkImage = (id: string | undefined) => {
-    switch (id) {
-      case "botanika": return parkBotanika;
-      case "islamic-center": return parkIslamicCenter;
-      case "ecopark": return parkEcoPark;
-      default: return "";
-    }
-  };
-
-  const parkImage = getParkImage(parkId);
-
-  const scenes = {
-    image1: {
-      url: `/${parkId}/image1.jpg`,
-      infoSpots: [
-        { x: 30, y: 45, title: "Nuqta 1", desc: "Bu hudud haqida ma'lumotlar yaqinda qo'shiladi." },
-      ],
-    },
-  };
-
-  const spots = scenes[currentScene].infoSpots;
 
   const [yaw, setYaw] = useState(0);
 
   return (
-    <div className="fixed inset-0 bg-background">
-      {/* 3D Canvas */}
+    <div className="fixed inset-0 bg-black">
       <div className="absolute inset-0 z-0">
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={75} ref={cameraRef} />
-          <Suspense fallback={
-            <Html center>
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                <p className="text-accent font-display tracking-[0.3em] uppercase text-xs">{parkName} {t.loadingTour}</p>
-                <p className="text-white/30 text-[10px]">{t.highQualityImage}</p>
-              </div>
-            </Html>
-          }>
-            <PanoramaSphere url={scenes[currentScene].url} opacity={1} />
-          </Suspense>
-          <OrbitControls 
-            enableZoom={false} 
-            enablePan={false} 
-            enableDamping 
-            dampingFactor={0.05} 
-            rotateSpeed={-0.4} 
-            onChange={(e) => {
-              if (e?.target?.object) {
-                // Get horizontal rotation in degrees
-                const rotation = e.target.object.rotation.y * (180 / Math.PI);
-                setYaw(rotation);
-              }
-            }}
-          />
+          <group>
+            <PanoramaSphere texture={textureA} opacity={opacityA} scale={activeBuffer === "A" ? sphereScale : 1} />
+            <PanoramaSphere texture={textureB} opacity={opacityB} scale={activeBuffer === "B" ? sphereScale : 1} />
+            {!isTransitioning && currentSceneData?.navPoints?.map((pt: any, idx: number) => (
+              <NavPoint key={`${currentSceneId}-${idx}`} pos={pt.pos} label={pt.label} onClick={() => handleSceneChange(pt.to, pt.label as any)} />
+            ))}
+          </group>
+          <OrbitControls enableZoom={false} enablePan={false} enableDamping dampingFactor={0.05} rotateSpeed={-0.4} onChange={(e) => {
+            if (e?.target?.object) setYaw(e.target.object.rotation.y * (180 / Math.PI));
+          }} />
         </Canvas>
       </div>
 
-      {/* Original UI Overlay */}
-      <div className="absolute inset-0 pointer-events-none z-10">
-        <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/30" />
-
-        {/* UI Overlay content remains but hotspots are removed */}
-
-
-        {/* Back button */}
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="absolute top-6 left-6 z-30 glass rounded-full px-5 py-2.5 flex items-center gap-2 text-foreground hover:bg-glass-border/30 transition-colors pointer-events-auto"
-          onClick={() => navigate("/")}
-        >
+      {/* UI Overlay */}
+      <div className="absolute inset-0 pointer-events-none z-10 font-display">
+        <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-6 z-30 glass rounded-full px-5 py-2.5 flex items-center gap-2 text-white pointer-events-auto" onClick={() => navigate("/")}>
           <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-semibold">{t.back}</span>
+          <span className="text-sm font-semibold tracking-wider">{t.back}</span>
         </motion.button>
-
-        {/* Top Right Buttons */}
         <div className="absolute top-6 right-6 z-30 flex items-center gap-3 pointer-events-auto">
-          {/* Info toggle */}
-          <motion.button
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors"
-            onClick={() => setShowInfo(!showInfo)}
-          >
-            <Info className="w-5 h-5 text-accent" />
-          </motion.button>
-
-          {/* Sound toggle */}
-          <motion.button
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors"
-            onClick={() => setSoundOn(!soundOn)}
-          >
-            {soundOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          </motion.button>
+          <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setShowInfo(!showInfo)}><Info className="w-5 h-5 text-accent" /></motion.button>
+          <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setSoundOn(!soundOn)}>{soundOn ? <Volume2 className="w-5 h-5 text-white" /> : <VolumeX className="w-5 h-5 text-white" />}</motion.button>
         </div>
-
-        {/* Mini-map */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="absolute bottom-6 right-6 z-30 glass-strong rounded-xl overflow-hidden w-44 h-32 border border-white/10"
-        >
-          {/* Stylized Map Background */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.1)_0%,transparent_70%)] opacity-50" />
-          
-          <div className="w-full h-full flex items-center justify-center relative">
-            {/* Compass Circle */}
-            <div className="w-24 h-24 rounded-full border border-dashed border-white/20 absolute" />
-            
-            {/* Rotating Direction Marker */}
-            <motion.div 
-              style={{ rotate: yaw }}
-              className="relative flex items-center justify-center"
-            >
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-accent" />
-              </div>
-              {/* Sight cone indicator */}
-              <div className="absolute -top-4 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-accent" />
+        <motion.div className="absolute bottom-8 right-8 z-30 glass-strong rounded-2xl overflow-hidden w-48 h-36 border border-white/10 shadow-2xl">
+          <div className="w-full h-full flex items-center justify-center relative bg-black/40">
+            <div className="w-28 h-28 rounded-full border border-dashed border-accent/30 absolute animate-spin-slow" />
+            <motion.div style={{ rotate: yaw }} className="relative flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(20,184,166,0.3)]"><MapPin className="w-6 h-6 text-accent" /></div>
+              <div className="absolute -top-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-accent drop-shadow-glow" />
             </motion.div>
           </div>
-          
-          <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md px-2 py-1 border-t border-white/5">
-            <p className="text-[9px] text-accent font-display font-medium text-center uppercase tracking-widest">{parkName}</p>
-          </div>
+          <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-2 py-2 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[9px] text-accent font-bold">{parkId === "botanika" ? "Botanika Bog'i" : "Park"}</div>
         </motion.div>
-
-        {/* Info Sidebar Overlay */}
-        <AnimatePresence>
-          {showInfo && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 glass-strong z-50 pointer-events-auto flex flex-col"
-            >
-              <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-display font-bold text-white">{t.infoTitle}</h2>
-                  <button 
-                    onClick={() => setShowInfo(false)}
-                    className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                  >
-                    <X className="w-6 h-6 text-white/50" />
-                  </button>
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
-                    <img 
-                      src={parkImage} 
-                      alt={parkName}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  </div>
-
-                  <h3 className="text-xl font-display font-semibold text-accent">{parkName}</h3>
-                  
-                  <div className="prose prose-invert prose-sm">
-                    <p className="text-white/80 leading-relaxed font-body text-base">
-                      {parkFullDesc}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-8 border-t border-white/5 bg-black/20">
-                <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-display">© 2026 Tashkent360</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <AnimatePresence>{showInfo && (
+          <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 glass-strong z-50 pointer-events-auto flex flex-col p-10 border-l border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between mb-10"><h2 className="text-2xl font-bold text-white tracking-tight">{t.infoTitle}</h2><button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X className="w-6 h-6 text-white/50" /></button></div>
+            <div className="prose prose-invert prose-sm overflow-y-auto custom-scrollbar pr-2"><p className="text-white/70 leading-relaxed text-lg font-body">{parkId === "botanika" ? t.botanikaFullDesc : t.ecoParkFullDesc}</p></div>
+          </motion.div>
+        )}</AnimatePresence>
       </div>
-
-
-
       <LocationTracker />
     </div>
   );
 };
 
 export default TourViewer;
-
