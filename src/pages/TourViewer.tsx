@@ -216,7 +216,18 @@ const TourViewer = () => {
         <AnimatePresence>{showInfo && (
           <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 glass-strong z-50 pointer-events-auto flex flex-col p-10 border-l border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-10"><h2 className="text-2xl font-bold text-white tracking-tight">{t.infoTitle}</h2><button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X className="w-6 h-6 text-white/50" /></button></div>
-            <div className="prose prose-invert prose-sm overflow-y-auto custom-scrollbar pr-2"><p className="text-white/70 leading-relaxed text-lg font-body">{parkId === "botanika" ? t.botanikaFullDesc : t.ecoParkFullDesc}</p></div>
+            <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
+              <img 
+                src={parkId === "botanika" ? parkBotanika : parkId === "islamic-center" ? parkIslamicCenter : parkEcoPark} 
+                alt={getParkName()} 
+                className="w-full h-52 object-cover rounded-2xl shadow-xl border border-white/10"
+              />
+              <div className="prose prose-invert prose-sm">
+                <p className="text-white/70 leading-relaxed text-lg font-body">
+                  {parkId === "botanika" ? t.botanikaFullDesc : t.ecoParkFullDesc}
+                </p>
+              </div>
+            </div>
           </motion.div>
         )}</AnimatePresence>
       </div>
