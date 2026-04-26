@@ -4,19 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
-import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
+import { Sphere, OrbitControls, Html, PerspectiveCamera, Ring, Circle } from "@react-three/drei";
 import * as THREE from "three";
 import { gsap } from "gsap";
 import LocationTracker from "@/components/LocationTracker";
 
-import parkBotanika from "@/assets/park-botanika.jpg";
-import parkIslamicCenter from "@/assets/park-islamic-center.png";
-import parkEcoPark from "@/assets/park-ecopark.png";
-
-// Optimized Sphere that doesn't trigger Suspense
+// Optimized Sphere
 const PanoramaSphere = ({ texture, opacity = 1, scale = 1 }: { texture: THREE.Texture | null; opacity?: number; scale?: number }) => {
   if (!texture) return null;
-
   return (
     <Sphere args={[500, 64, 32]} scale={[-scale, scale, scale]}>
       <meshBasicMaterial map={texture} side={THREE.BackSide} transparent opacity={opacity} depthTest={false} />
@@ -24,26 +19,79 @@ const PanoramaSphere = ({ texture, opacity = 1, scale = 1 }: { texture: THREE.Te
   );
 };
 
+// Premium Matterport-style Ground Navigation Point
 const NavPoint = ({ pos, onClick, label }: { pos: [number, number, number]; onClick: () => void; label: string }) => {
+  const [hovered, setHovered] = useState(false);
+  const rippleRef = useRef<THREE.Mesh>(null!);
+
+  // Pulse animation for the ripple effect
+  useEffect(() => {
+    gsap.to(rippleRef.current.scale, {
+      x: 1.5,
+      y: 1.5,
+      z: 1.5,
+      duration: 2,
+      repeat: -1,
+      ease: "power1.out",
+    });
+    gsap.to(rippleRef.current.material, {
+      opacity: 0,
+      duration: 2,
+      repeat: -1,
+      ease: "power1.out",
+    });
+  }, []);
+
   return (
     <group position={pos}>
-      <Html center>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.1 }}
+      {/* Ground Disc (Perspective) */}
+      <group rotation={[-Math.PI / 2, 0, 0]}>
+        {/* Main Circle */}
+        <mesh 
           onClick={(e) => { e.stopPropagation(); onClick(); }}
-          className="cursor-pointer group flex flex-col items-center gap-2"
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
         >
-          <div className="glass px-4 py-1.5 rounded-full border border-white/20">
-            <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-accent">{label}</span>
+          <circleGeometry args={[8, 32]} />
+          <meshBasicMaterial 
+            color={hovered ? "#14b8a6" : "#ffffff"} 
+            transparent 
+            opacity={0.4} 
+            side={THREE.DoubleSide} 
+          />
+        </mesh>
+
+        {/* Ring border */}
+        <mesh>
+          <ringGeometry args={[8, 9, 32]} />
+          <meshBasicMaterial color="white" transparent opacity={0.6} side={THREE.DoubleSide} />
+        </mesh>
+
+        {/* Ripple effect mesh */}
+        <mesh ref={rippleRef}>
+          <ringGeometry args={[8, 10, 32]} />
+          <meshBasicMaterial color="#14b8a6" transparent opacity={0.5} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+
+      {/* Floating Label and Icon */}
+      <Html center position={[0, 5, 0]}>
+        <motion.div
+          animate={{ y: hovered ? -5 : 0 }}
+          className="flex flex-col items-center gap-2 cursor-pointer pointer-events-none"
+        >
+          <div className={`glass px-4 py-1 rounded-full border border-white/20 transition-all duration-300 ${hovered ? 'bg-accent/40 border-accent/50 scale-110 shadow-[0_0_15px_rgba(20,184,166,0.4)]' : ''}`}>
+            <span className="text-[11px] font-display font-bold uppercase tracking-[0.2em] text-white">
+              {label}
+            </span>
           </div>
-          <div className="relative w-16 h-16 flex items-center justify-center">
-            <div className="absolute inset-0 bg-accent/20 rounded-full blur-lg animate-pulse" />
-            <div className="relative glass-strong p-3 rounded-2xl border-2 border-white/20 group-hover:border-accent/50 transition-all shadow-[0_0_20px_rgba(20,184,166,0.2)]">
-              <ArrowUp className="text-white w-8 h-8" />
-            </div>
-          </div>
+          <motion.div 
+            animate={{ y: [0, -3, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className={`glass p-2.5 rounded-xl border border-white/10 transition-all duration-300 ${hovered ? 'bg-accent/20 border-accent/40' : ''}`}
+          >
+            <ArrowUp className={`w-6 h-6 transition-colors ${hovered ? 'text-accent' : 'text-white/80'}`} />
+          </motion.div>
         </motion.div>
       </Html>
     </group>
@@ -57,7 +105,6 @@ const TourViewer = () => {
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   
-  // Double Buffer Textures
   const [textureA, setTextureA] = useState<THREE.Texture | null>(null);
   const [textureB, setTextureB] = useState<THREE.Texture | null>(null);
   const [activeBuffer, setActiveBuffer] = useState<"A" | "B">("A");
@@ -72,7 +119,6 @@ const TourViewer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const textureLoader = useRef(new THREE.TextureLoader());
 
-  // Load Initial Texture
   useEffect(() => {
     const initialUrl = getScenes()["1"].url;
     textureLoader.current.load(initialUrl, (tex) => {
@@ -98,9 +144,7 @@ const TourViewer = () => {
       audioRef.current.play().catch(() => {});
     } else if (audioRef.current) audioRef.current.pause();
 
-    return () => {
-      if (audioRef.current) audioRef.current.pause();
-    };
+    return () => { if (audioRef.current) audioRef.current.pause(); };
   }, [soundOn, parkId]);
 
   const getScenes = () => {
@@ -110,8 +154,8 @@ const TourViewer = () => {
         botanikaScenes[i.toString()] = {
           url: `/botanika/${i}.webp?v=4`,
           navPoints: [
-            ...(i < 17 ? [{ to: (i + 1).toString(), pos: [100, -60, 0] as [number, number, number], label: "Oldinga" }] : []),
-            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-100, -60, 0] as [number, number, number], label: "Ortga" }] : []),
+            ...(i < 17 ? [{ to: (i + 1).toString(), pos: [80, -85, 40] as [number, number, number], label: "Oldinga" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-80, -85, -40] as [number, number, number], label: "Ortga" }] : []),
           ]
         };
       }
@@ -130,7 +174,6 @@ const TourViewer = () => {
     const nextUrl = scenes[targetId]?.url;
     if (!nextUrl) { setIsTransitioning(false); return; }
 
-    // Start FOV Zoom instantly
     gsap.to(cameraRef.current, {
       fov: 35,
       duration: 1.2,
@@ -138,7 +181,6 @@ const TourViewer = () => {
       onUpdate: () => cameraRef.current.updateProjectionMatrix()
     });
 
-    // Preload next texture
     textureLoader.current.load(nextUrl, (tex) => {
       tex.minFilter = THREE.LinearFilter;
       tex.generateMipmaps = false;
@@ -146,7 +188,6 @@ const TourViewer = () => {
       if (activeBuffer === "A") setTextureB(tex);
       else setTextureA(tex);
 
-      // Perform Cross-fade
       gsap.to({ opA: opacityA, opB: opacityB, scale: 1 }, {
         opA: activeBuffer === "A" ? 0 : 1,
         opB: activeBuffer === "A" ? 1 : 0,
@@ -225,7 +266,7 @@ const TourViewer = () => {
         </Canvas>
       </div>
 
-      {/* UI Elements */}
+      {/* UI Overlay */}
       <div className="absolute inset-0 pointer-events-none z-10 font-display">
         <motion.button
           initial={{ opacity: 0, x: -20 }}
