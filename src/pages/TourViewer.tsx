@@ -2,7 +2,7 @@ import { useState, useRef, Suspense, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ArrowUp } from "lucide-react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -13,7 +13,6 @@ import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkEcoPark from "@/assets/park-ecopark.png";
 
-// Optimization: Pre-loading textures
 const PanoramaSphere = ({ url, opacity = 1, scale = 1 }: { url: string; opacity?: number; scale?: number }) => {
   const texture = useLoader(THREE.TextureLoader, url);
   texture.minFilter = THREE.LinearFilter;
@@ -66,8 +65,8 @@ const TourViewer = () => {
   const [opacityA, setOpacityA] = useState(1);
   const [opacityB, setOpacityB] = useState(0);
   const [sphereScale, setSphereScale] = useState(1);
-  
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -84,10 +83,8 @@ const TourViewer = () => {
         audioRef.current.loop = true;
         audioRef.current.volume = 0.5;
       }
-      audioRef.current.play().catch(e => console.log("Audio play blocked by browser", e));
-    } else {
-      if (audioRef.current) audioRef.current.pause();
-    }
+      audioRef.current.play().catch(e => console.log("Audio play blocked", e));
+    } else if (audioRef.current) audioRef.current.pause();
 
     return () => {
       if (audioRef.current) {
@@ -105,8 +102,6 @@ const TourViewer = () => {
       default: return "Park";
     }
   };
-
-  const parkName = getParkName();
 
   const getScenes = () => {
     if (parkId === "botanika") {
@@ -126,30 +121,32 @@ const TourViewer = () => {
   };
 
   const scenes = getScenes();
-  const currentSceneId = activeBuffer === "A" ? sceneA : sceneB;
+  const currentSceneId = activeBuffer === "A" ? sceneA : (sceneB || "1");
   const currentSceneData = scenes[currentSceneId] || scenes["1"];
 
   const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga") => {
     if (isTransitioning) return;
-    
     setIsTransitioning(true);
+    
     const nextUrl = scenes[targetId]?.url;
-    if (!nextUrl) return;
+    if (!nextUrl) { setIsTransitioning(false); return; }
 
-    const timeline = gsap.timeline();
-
-    // 1. INSTANT FEEDBACK: Start Zooming immediately
-    timeline.to(cameraRef.current, {
+    // Start FOV Animation immediately
+    gsap.to(cameraRef.current, {
       fov: 38,
-      duration: 1.5, // Slightly longer zoom to mask loading
+      duration: 1.2,
       ease: "power2.inOut",
       onUpdate: () => cameraRef.current.updateProjectionMatrix()
     });
 
-    // 2. Start Loading in parallel
     const loader = new THREE.TextureLoader();
     loader.load(nextUrl, () => {
-      // Once loaded, perform the cross-fade
+      // Switch buffer data
+      if (activeBuffer === "A") setSceneB(targetId);
+      else setSceneA(targetId);
+
+      // Start Cross-fade
+      const timeline = gsap.timeline();
       timeline.to({ opA: opacityA, opB: opacityB, scale: 1 }, {
         opA: activeBuffer === "A" ? 0 : 1,
         opB: activeBuffer === "A" ? 1 : 0,
@@ -162,15 +159,9 @@ const TourViewer = () => {
           setOpacityB(targets.opB);
           setSphereScale(targets.scale);
         },
-        onStart: () => {
-          // Switch scene ID in the hidden buffer right before fade starts
-          if (activeBuffer === "A") setSceneB(targetId);
-          else setSceneA(targetId);
-        },
         onComplete: () => {
           setActiveBuffer(activeBuffer === "A" ? "B" : "A");
           
-          // Reset FOV and Scale
           gsap.to(cameraRef.current, {
             fov: 75,
             duration: 1.0,
@@ -188,8 +179,8 @@ const TourViewer = () => {
             onComplete: () => setIsTransitioning(false)
           });
         }
-      }, "-=0.5"); // Start fading while zoom is still finishing
-    });
+      });
+    }, undefined, () => setIsTransitioning(false)); // Error handling
   };
 
   const [yaw, setYaw] = useState(0);
@@ -207,7 +198,6 @@ const TourViewer = () => {
                 scale={activeBuffer === "A" ? sphereScale : 1}
               />
             )}
-            
             {sceneB && (
               <PanoramaSphere 
                 url={scenes[sceneB]?.url || scenes["1"].url} 
@@ -215,8 +205,7 @@ const TourViewer = () => {
                 scale={activeBuffer === "B" ? sphereScale : 1}
               />
             )}
-            
-            {!isTransitioning && currentSceneData.navPoints?.map((pt: any, idx: number) => (
+            {!isTransitioning && currentSceneData?.navPoints?.map((pt: any, idx: number) => (
               <NavPoint 
                 key={`${currentSceneId}-${idx}`} 
                 pos={pt.pos} 
@@ -232,9 +221,7 @@ const TourViewer = () => {
             dampingFactor={0.05} 
             rotateSpeed={-0.4} 
             onChange={(e) => {
-              if (e?.target?.object) {
-                setYaw(e.target.object.rotation.y * (180 / Math.PI));
-              }
+              if (e?.target?.object) setYaw(e.target.object.rotation.y * (180 / Math.PI));
             }}
           />
         </Canvas>
@@ -254,16 +241,10 @@ const TourViewer = () => {
         </motion.button>
 
         <div className="absolute top-6 right-6 z-30 flex items-center gap-3 pointer-events-auto">
-          <motion.button
-            className="glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors"
-            onClick={() => setShowInfo(!showInfo)}
-          >
+          <motion.button className="glass rounded-full p-3" onClick={() => setShowInfo(!showInfo)}>
             <Info className="w-5 h-5 text-accent" />
           </motion.button>
-          <motion.button
-            className="glass rounded-full p-3 text-foreground hover:bg-glass-border/30 transition-colors"
-            onClick={() => setSoundOn(!soundOn)}
-          >
+          <motion.button className="glass rounded-full p-3" onClick={() => setSoundOn(!soundOn)}>
             {soundOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </motion.button>
         </div>
@@ -278,8 +259,8 @@ const TourViewer = () => {
               <div className="absolute -top-4 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-accent" />
             </motion.div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md px-2 py-1 border-t border-white/5">
-            <p className="text-[9px] text-accent font-display font-medium text-center uppercase tracking-widest">{parkName}</p>
+          <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md px-2 py-1 border-t border-white/5 text-center uppercase tracking-widest text-[9px] text-accent">
+            {getParkName()}
           </div>
         </motion.div>
 
@@ -293,7 +274,7 @@ const TourViewer = () => {
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-display font-bold text-white">{t.infoTitle}</h2>
-                <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full">
                   <X className="w-6 h-6 text-white/50" />
                 </button>
               </div>
