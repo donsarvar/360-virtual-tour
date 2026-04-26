@@ -182,41 +182,67 @@ const TourViewer = () => {
           <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setSoundOn(!soundOn)}>{soundOn ? <Volume2 className="w-5 h-5 text-white" /> : <VolumeX className="w-5 h-5 text-white" />}</motion.button>
         </div>
 
-        {/* Navigation Hub */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center gap-4">
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-strong rounded-3xl p-2 flex items-center gap-2 border border-white/10 shadow-2xl">
-            <button disabled={!backwardPoint || isTransitioning} onClick={() => backwardPoint && handleSceneChange(backwardPoint.to, "ORTGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!backwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
-              <ChevronDown className="w-6 h-6 text-white" /><span className="text-[10px] font-bold uppercase tracking-widest text-white/70">ORTGA</span>
-            </button>
-            <div className="w-[1px] h-10 bg-white/10" />
-            <button disabled={!forwardPoint || isTransitioning} onClick={() => forwardPoint && handleSceneChange(forwardPoint.to, "OLDINGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!forwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
-              <ChevronUp className="w-6 h-6 text-accent animate-pulse" /><span className="text-[10px] font-bold uppercase tracking-widest text-accent">OLDINGA</span>
-            </button>
-          </motion.div>
-        </div>
+        {/* Navigation Hub - Hidden when Map is open on Mobile */}
+        <AnimatePresence>
+          {!showMap && (
+            <motion.div 
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 pointer-events-auto flex items-center gap-4"
+            >
+              <div className="glass-strong rounded-3xl p-2 flex items-center gap-2 border border-white/10 shadow-2xl">
+                <button disabled={!backwardPoint || isTransitioning} onClick={() => backwardPoint && handleSceneChange(backwardPoint.to, "ORTGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!backwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
+                  <ChevronDown className="w-6 h-6 text-white" /><span className="text-[10px] font-bold uppercase tracking-widest text-white/70">ORTGA</span>
+                </button>
+                <div className="w-[1px] h-10 bg-white/10" />
+                <button disabled={!forwardPoint || isTransitioning} onClick={() => forwardPoint && handleSceneChange(forwardPoint.to, "OLDINGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!forwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
+                  <ChevronUp className="w-6 h-6 text-accent animate-pulse" /><span className="text-[10px] font-bold uppercase tracking-widest text-accent">OLDINGA</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Animated Real-Map Sidebar */}
+        {/* Animated Real-Map - Adaptive for Mobile/Desktop */}
         <AnimatePresence>
           {showMap && (
             <motion.div 
-              initial={{ x: 100, opacity: 0, scale: 0.9 }}
-              animate={{ x: 0, opacity: 1, scale: 1 }}
-              exit={{ x: 100, opacity: 0, scale: 0.9 }}
-              className="absolute bottom-8 right-8 z-30 glass-strong rounded-3xl overflow-hidden w-64 h-48 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.4)] pointer-events-auto"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className={`absolute z-50 pointer-events-auto flex flex-col shadow-2xl overflow-hidden
+                ${window.innerWidth < 768 
+                  ? 'inset-x-6 top-24 bottom-24 rounded-[40px]' // Mobile: Large centered modal
+                  : 'bottom-8 right-8 w-80 h-60 rounded-3xl' // Desktop: Corner element
+                } glass-strong border border-white/20`}
             >
               <div className="w-full h-full relative bg-black/60 overflow-hidden">
                 <img src={`/maps/${parkId}.png`} alt="Park Map" className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-screen" />
+                
+                {/* Compass on Map */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div style={{ rotate: yaw }} className="relative flex items-center justify-center scale-125">
-                    <div className="w-8 h-8 rounded-full bg-accent/30 flex items-center justify-center border border-accent/50 shadow-[0_0_15px_rgba(20,184,166,0.5)]">
-                      <MapPin className="w-5 h-5 text-accent" />
+                  <motion.div style={{ rotate: yaw }} className={`relative flex items-center justify-center ${window.innerWidth < 768 ? 'scale-150' : 'scale-125'}`}>
+                    <div className="w-10 h-10 rounded-full bg-accent/30 flex items-center justify-center border border-accent/50 shadow-[0_0_20px_rgba(20,184,166,0.6)]">
+                      <MapPin className="w-6 h-6 text-accent" />
                     </div>
-                    <div className="absolute -top-5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-accent drop-shadow-[0_0_5px_rgba(20,184,166,1)]" />
+                    <div className="absolute -top-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-accent drop-shadow-[0_0_8px_rgba(20,184,166,1)]" />
                   </motion.div>
                 </div>
-                <button onClick={() => setShowMap(false)} className="absolute top-3 right-3 p-1.5 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><X className="w-4 h-4 text-white/50" /></button>
+
+                {/* Big Close Button for Mobile */}
+                <button 
+                  onClick={() => setShowMap(false)} 
+                  className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full transition-all active:scale-90"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+                
+                {/* Bottom Label */}
+                <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-4 py-3 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[10px] text-accent font-bold">
+                  {getParkName()} — {t.infoTitle}
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl px-2 py-2 border-t border-white/5 text-center uppercase tracking-[0.2em] text-[9px] text-accent font-bold">Xarita: {getParkName()}</div>
             </motion.div>
           )}
         </AnimatePresence>
