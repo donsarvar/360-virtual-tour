@@ -154,8 +154,8 @@ const TourViewer = () => {
         botanikaScenes[i.toString()] = {
           url: `/botanika/${i}.webp?v=4`,
           navPoints: [
-            ...(i < 17 ? [{ to: (i + 1).toString(), pos: [80, -85, 40] as [number, number, number], label: "Oldinga" }] : []),
-            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-80, -85, -40] as [number, number, number], label: "Ortga" }] : []),
+            ...(i < 17 ? [{ to: (i + 1).toString(), pos: [80, -85, 40] as [number, number, number], label: "OLGA" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), pos: [-80, -85, -40] as [number, number, number], label: "ORTGA" }] : []),
           ]
         };
       }
