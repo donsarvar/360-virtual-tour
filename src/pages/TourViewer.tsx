@@ -193,11 +193,11 @@ const TourViewer = () => {
                 className="glass-strong rounded-3xl p-2 flex items-center gap-2 border border-white/10 shadow-2xl"
               >
                 <button disabled={!backwardPoint || isTransitioning} onClick={() => backwardPoint && handleSceneChange(backwardPoint.to, "ORTGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!backwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
-                  <ChevronDown className="w-6 h-6 text-white" /><span className="text-[10px] font-bold uppercase tracking-widest text-white/70">ORTGA</span>
+                  <ChevronDown className="w-6 h-6 text-white" /><span className="text-[10px] font-bold uppercase tracking-widest text-white/70">{t.backward}</span>
                 </button>
                 <div className="w-[1px] h-10 bg-white/10" />
                 <button disabled={!forwardPoint || isTransitioning} onClick={() => forwardPoint && handleSceneChange(forwardPoint.to, "OLDINGA")} className={`flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all ${!forwardPoint ? 'opacity-30' : 'hover:bg-white/10 active:scale-95'}`}>
-                  <ChevronUp className="w-6 h-6 text-accent animate-pulse" /><span className="text-[10px] font-bold uppercase tracking-widest text-accent">OLDINGA</span>
+                  <ChevronUp className="w-6 h-6 text-accent animate-pulse" /><span className="text-[10px] font-bold uppercase tracking-widest text-accent">{t.forward}</span>
                 </button>
               </motion.div>
             </div>

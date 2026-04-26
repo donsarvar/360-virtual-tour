@@ -32,6 +32,8 @@ const translations = {
     botanikaFullDesc: "Toshkent Botanika bog'i — Markaziy Osiyodagi eng yirik va eng qadimiy botanika bog'laridan biridir. 1943-yilda tashkil etilgan ushbu bog' 65 gektardan ortiq maydonni egallaydi. Bu yerda dunyoning turli burchaklaridan keltirilgan 4500 dan ortiq o'simlik turlari mavjud. Bog' bir necha zonalarga bo'lingan: Evropa, Markaziy Osiyo, Sharqiy Osiyo va Shimoliy Amerika florasi.",
     islamicCenterFullDesc: "O'zbekistondagi Islom sivilizatsiyasi markazi — uchinchi Renessans poydevori sifatida bunyod etilmoqda. Ushbu mahobatli majmua islom madaniyati va ilm-fani tarixini, buyuk allomalarimiz merosini o'rganish va dunyoga tanitish maqsadida tashkil etilgan. Markaz kutubxonasida noyob qo'lyozmalar, jumladan, mashhur Usmon Qur'oni saqlanadi. Bino me'morchiligi o'zbek milliy an'analari va islom san'atining eng yuksak namunalarini o'zida mujassam etgan.",
     ecoParkFullDesc: "Zahiriddin Muhammad Bobur nomidagi Toshkent markaziy eko-bog'i (Eko bog') — shahrimizning qoq markazidagi zamonaviy dam olish maskanidir. 2017-yilda ochilgan ushbu bog' ekologik toza materiallardan foydalangan holda barpo etilgan. Bu yerda sun'iy ko'l, sayr qilish yo'laklari, sport maydonchalari va bolalar uchun o'yin zonalari mavjud.",
+    forward: "OLDINGA",
+    backward: "ORTGA",
   },
   ru: {
     heroTitle: "Добро пожаловать в виртуальное путешествие",
@@ -62,6 +64,8 @@ const translations = {
     botanikaFullDesc: "Ташкентский Ботанический сад — один из крупнейших и старейших ботанических садов в Средней Азии. Основанный в 1943 году, сад занимает площадь более 65 гектаров. Здесь представлено более 4500 видов растений со всего мира. Сад разделен на несколько флористических зон: Европа, Средняя Азия, Восточная Азия и Северная Америка.",
     islamicCenterFullDesc: "Центр исламской цивилизации в Узбекистане строится как фундамент третьего Ренессанса. Этот величественный комплекс был создан для изучения и популяризации истории исламской культуры и науки, а также наследия наших великих ученых. В библиотеке центра хранятся редкие рукописи, в том числе знаменитый Коран Османа.",
     ecoParkFullDesc: "Центральный эко-парк Ташкента имени Захириддина Мухаммада Бабура (Эко-парк) — современное место отдыха в самом центре города. Открытый в 2017 году, парк был построен с использованием экологически чистых материалов. Здесь есть искусственное озеро, прогулочные дорожки и спортивные площадки.",
+    forward: "ВПЕРЕД",
+    backward: "НАЗАД",
   },
   en: {
     heroTitle: "Welcome to the Virtual Journey",
@@ -92,6 +96,8 @@ const translations = {
     botanikaFullDesc: "The Tashkent Botanical Garden is one of the largest and oldest botanical gardens in Central Asia. Established in 1943, the garden covers more than 65 hectares. It is home to over 4,500 species of plants from all over the world. The garden is divided into several floristic zones: Europe, Central Asia, East Asia, and North America.",
     islamicCenterFullDesc: "The Center of Islamic Civilization in Uzbekistan is being built as the foundation of the third Renaissance. This majestic complex was established to study and promote the history of Islamic culture and science, as well as the heritage of our great scholars. The center's library houses rare manuscripts, including the famous Quran of Usman.",
     ecoParkFullDesc: "The Tashkent Central Eco Park named after Zahiriddin Muhammad Babur (Eco Park) is a modern recreation destination in the heart of the city. Opened in 2017, the park was built using environmentally friendly materials. It features an artificial lake, walking paths, and sports fields.",
+    forward: "FORWARD",
+    backward: "BACKWARD",
   },
 };
 
