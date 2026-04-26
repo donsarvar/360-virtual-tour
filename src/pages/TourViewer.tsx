@@ -14,8 +14,7 @@ import parkIslamicCenter from "@/assets/park-islamic-center.png";
 import parkEcoPark from "@/assets/park-ecopark.png";
 
 // Optimization: Pre-loading textures
-const PanoramaSphere = ({ url, opacity = 1, scale = 1, visible = true }: { url: string; opacity?: number; scale?: number; visible?: boolean }) => {
-  if (!visible) return null;
+const PanoramaSphere = ({ url, opacity = 1, scale = 1 }: { url: string; opacity?: number; scale?: number }) => {
   const texture = useLoader(THREE.TextureLoader, url);
   texture.minFilter = THREE.LinearFilter;
   texture.generateMipmaps = false;
@@ -60,7 +59,6 @@ const TourViewer = () => {
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   
-  // Double Buffer Scene State
   const [sceneA, setSceneA] = useState("1");
   const [sceneB, setSceneB] = useState("");
   const [activeBuffer, setActiveBuffer] = useState<"A" | "B">("A");
@@ -73,7 +71,6 @@ const TourViewer = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Audio handling
   useEffect(() => {
     const audioUrls: Record<string, string> = {
       "botanika": "/audio/Botanika bogi.m4a",
@@ -100,14 +97,16 @@ const TourViewer = () => {
     };
   }, [soundOn, parkId]);
 
-  const parkName = (id: string | undefined) => {
-    switch (id) {
+  const getParkName = () => {
+    switch (parkId) {
       case "botanika": return "Botanika Bog'i";
       case "islamic-center": return "Islom Sivilizatsiyasi Markazi";
       case "ecopark": return "Eko Park";
       default: return "Park";
     }
-  }(parkId);
+  };
+
+  const parkName = getParkName();
 
   const getScenes = () => {
     if (parkId === "botanika") {
@@ -133,13 +132,13 @@ const TourViewer = () => {
   const handleSceneChange = (targetId: string, direction: "Oldinga" | "Ortga") => {
     if (isTransitioning) return;
     
-    const nextUrl = scenes[targetId].url;
+    const nextUrl = scenes[targetId]?.url;
+    if (!nextUrl) return;
+
     const loader = new THREE.TextureLoader();
-    
     loader.load(nextUrl, () => {
       setIsTransitioning(true);
       
-      // Load next scene into the hidden buffer
       if (activeBuffer === "A") {
         setSceneB(targetId);
       } else {
@@ -148,7 +147,6 @@ const TourViewer = () => {
 
       const timeline = gsap.timeline();
 
-      // 1. Zoom FOV for movement illusion
       timeline.to(cameraRef.current, {
         fov: 40,
         duration: 0.8,
@@ -156,7 +154,6 @@ const TourViewer = () => {
         onUpdate: () => cameraRef.current.updateProjectionMatrix()
       });
 
-      // 2. Cross-fade and Scale
       timeline.to({ opA: opacityA, opB: opacityB, scale: 1 }, {
         opA: activeBuffer === "A" ? 0 : 1,
         opB: activeBuffer === "A" ? 1 : 0,
@@ -170,10 +167,8 @@ const TourViewer = () => {
           setSphereScale(targets.scale);
         },
         onComplete: () => {
-          // Finalize switch
           setActiveBuffer(activeBuffer === "A" ? "B" : "A");
           
-          // Reset FOV and Scale
           gsap.to(cameraRef.current, {
             fov: 75,
             duration: 0.8,
@@ -202,35 +197,23 @@ const TourViewer = () => {
       <div className="absolute inset-0 z-0">
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={75} ref={cameraRef} />
-          <Suspense fallback={
-            <Html center>
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                <p className="text-accent font-display tracking-[0.3em] uppercase text-xs">{parkName} {t.loadingTour}</p>
-              </div>
-            </Html>
-          }>
-            {/* Buffer A */}
+          <Suspense fallback={null}>
             {sceneA && (
               <PanoramaSphere 
                 url={scenes[sceneA]?.url || scenes["1"].url} 
                 opacity={opacityA} 
                 scale={activeBuffer === "A" ? sphereScale : 1}
-                visible={opacityA > 0}
               />
             )}
             
-            {/* Buffer B */}
             {sceneB && (
               <PanoramaSphere 
                 url={scenes[sceneB]?.url || scenes["1"].url} 
                 opacity={opacityB} 
                 scale={activeBuffer === "B" ? sphereScale : 1}
-                visible={opacityB > 0}
               />
             )}
             
-            {/* Navigation Points - Tied to ACTIVE buffer */}
             {!isTransitioning && currentSceneData.navPoints?.map((pt: any, idx: number) => (
               <NavPoint 
                 key={`${currentSceneId}-${idx}`} 
@@ -255,7 +238,6 @@ const TourViewer = () => {
         </Canvas>
       </div>
 
-      {/* UI Overlay */}
       <div className="absolute inset-0 pointer-events-none z-10">
         <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/30" />
         
@@ -284,10 +266,7 @@ const TourViewer = () => {
           </motion.button>
         </div>
 
-        {/* Mini-map */}
-        <motion.div
-          className="absolute bottom-6 right-6 z-30 glass-strong rounded-xl overflow-hidden w-44 h-32 border border-white/10"
-        >
+        <motion.div className="absolute bottom-6 right-6 z-30 glass-strong rounded-xl overflow-hidden w-44 h-32 border border-white/10">
           <div className="w-full h-full flex items-center justify-center relative">
             <div className="w-24 h-24 rounded-full border border-dashed border-white/20 absolute" />
             <motion.div style={{ rotate: yaw }} className="relative flex items-center justify-center">
@@ -302,7 +281,6 @@ const TourViewer = () => {
           </div>
         </motion.div>
 
-        {/* Info Sidebar */}
         <AnimatePresence>
           {showInfo && (
             <motion.div
