@@ -9,8 +9,8 @@ if (!fs.existsSync(destDir)) {
 }
 
 async function copyFiles() {
-    console.log('Copying 360 files...');
-    for (let i = 1; i <= 21; i++) {
+    console.log('Copying 18 360 files...');
+    for (let i = 1; i <= 18; i++) {
         const sourceFileName = `${i}.jpg`;
         const sourceFile = path.join(sourceDir, sourceFileName);
         const destJpgFile = path.join(destDir, `${i}.jpg`);
