@@ -103,7 +103,7 @@ const TourViewer = () => {
       const ecoScenes: Record<string, any> = {};
       for (let i = 1; i <= 22; i++) {
         ecoScenes[i.toString()] = {
-          url: `/ecopark/${i}.webp?v=1`,
+          url: `/ecopark/${i}.jpg?v=2`,
           navPoints: [
             ...(i < 22 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
