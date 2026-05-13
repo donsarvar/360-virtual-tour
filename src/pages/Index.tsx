@@ -33,9 +33,8 @@ const Index = () => {
             
             <button 
               onClick={() => setShowContact(true)}
-              className="text-xs font-bold uppercase tracking-widest text-accent hover:text-white transition-colors flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10"
+              className="text-xs font-bold uppercase tracking-widest text-accent hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10"
             >
-              <Code2 className="w-3 h-3" />
               {t.contactUs}
             </button>
           </div>
