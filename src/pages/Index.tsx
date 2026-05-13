@@ -65,8 +65,8 @@ const Index = () => {
                 </button>
 
                 <div className="text-center mb-8">
-                  <div className="w-20 h-20 mx-auto bg-gradient-to-br from-accent to-accent/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(20,184,166,0.3)] border border-accent/30">
-                    <Code2 className="w-10 h-10 text-white" />
+                  <div className="w-24 h-24 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(20,184,166,0.1)] border border-white/10 p-4">
+                    <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain drop-shadow-lg" />
                   </div>
                   <h3 className="text-2xl font-display font-bold text-white mb-1">{t.developer}</h3>
                   <p className="text-white/50 text-sm tracking-widest uppercase">{t.contactUs}</p>
