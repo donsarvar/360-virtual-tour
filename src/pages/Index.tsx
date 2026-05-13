@@ -73,23 +73,23 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <a href="tel:+998000000000" className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                  <a href="tel:+998977480123" className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
                     <div className="p-3 rounded-full bg-white/5 text-accent group-hover:scale-110 transition-transform">
                       <Phone className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="text-xs text-white/50 uppercase tracking-wider">{t.phone}</p>
-                      <p className="text-white font-medium">+998 00 000 00 00</p>
+                      <p className="text-white font-medium">+998 97 748 0123</p>
                     </div>
                   </a>
 
-                  <a href="mailto:example@gmail.com" className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
+                  <a href="mailto:salimovsarvar21@gmail.com" className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group">
                     <div className="p-3 rounded-full bg-white/5 text-accent group-hover:scale-110 transition-transform">
                       <Mail className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="text-xs text-white/50 uppercase tracking-wider">{t.email}</p>
-                      <p className="text-white font-medium">example@gmail.com</p>
+                      <p className="text-white font-medium">salimovsarvar21@gmail.com</p>
                     </div>
                   </a>
 
