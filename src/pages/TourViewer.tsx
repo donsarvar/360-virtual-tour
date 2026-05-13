@@ -87,11 +87,11 @@ const TourViewer = () => {
   const getScenes = () => {
     if (parkId === "botanika") {
       const botanikaScenes: Record<string, any> = {};
-      for (let i = 1; i <= 17; i++) {
+      for (let i = 1; i <= 16; i++) {
         botanikaScenes[i.toString()] = {
           url: `/botanika/${i}.webp?v=4`,
           navPoints: [
-            ...(i < 17 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i < 16 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
           ]
         };
