@@ -34,7 +34,7 @@ const translations = {
     ecoParkFullDesc: "Zahiriddin Muhammad Bobur nomidagi Toshkent markaziy eko-bog'i (Eko bog') — shahrimizning qoq markazidagi zamonaviy dam olish maskanidir. 2017-yilda ochilgan ushbu bog' ekologik toza materiallardan foydalangan holda barpo etilgan. Bu yerda sun'iy ko'l, sayr qilish yo'laklari, sport maydonchalari va bolalar uchun o'yin zonalari mavjud.",
     forward: "OLDINGA",
     backward: "ORTGA",
-    contactUs: "Aloqa",
+    contactUs: "Bog'lanish",
     developer: "Dasturchi",
     phone: "Telefon",
     email: "Email",
