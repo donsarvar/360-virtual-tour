@@ -94,10 +94,10 @@ const Index = () => {
                   </a>
 
                   <div className="flex justify-center gap-4 pt-4">
-                    <a href="#" className="p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-[#0088cc] hover:border-[#0088cc]/50 transition-all group">
+                    <a href="https://t.me/SarvarSalimovv" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-[#0088cc] hover:border-[#0088cc]/50 transition-all group">
                       <Send className="w-6 h-6 group-hover:scale-110 transition-transform -translate-x-[2px] translate-y-[2px]" />
                     </a>
-                    <a href="#" className="p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-[#E1306C] hover:border-[#E1306C]/50 transition-all group">
+                    <a href="https://www.instagram.com/sarvarsalimovv?igsh=ZjhybWpkd3l1ZXly" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-[#E1306C] hover:border-[#E1306C]/50 transition-all group">
                       <Instagram className="w-6 h-6 group-hover:scale-110 transition-transform" />
                     </a>
                   </div>
