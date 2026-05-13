@@ -5,7 +5,7 @@ import ParkSelection from "@/components/ParkSelection";
 import BrandLoader from "@/components/BrandLoader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Phone, Mail, Instagram, MessageCircle, Code2 } from "lucide-react";
+import { X, Phone, Mail, Instagram, Send, Code2 } from "lucide-react";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -95,7 +95,7 @@ const Index = () => {
 
                   <div className="flex justify-center gap-4 pt-4">
                     <a href="#" className="p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-[#0088cc] hover:border-[#0088cc]/50 transition-all group">
-                      <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                      <Send className="w-6 h-6 group-hover:scale-110 transition-transform -translate-x-[2px] translate-y-[2px]" />
                     </a>
                     <a href="#" className="p-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-[#E1306C] hover:border-[#E1306C]/50 transition-all group">
                       <Instagram className="w-6 h-6 group-hover:scale-110 transition-transform" />
