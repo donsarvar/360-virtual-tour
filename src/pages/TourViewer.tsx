@@ -115,11 +115,11 @@ const TourViewer = () => {
 
     if (parkId === "islamic-center") {
       const islomScenes: Record<string, any> = {};
-      for (let i = 1; i <= 18; i++) {
+      for (let i = 1; i <= 17; i++) {
         islomScenes[i.toString()] = {
-          url: `/islamic-center/${i}.jpg?v=1`,
+          url: `/islamic-center/${i}.jpg?v=2`,
           navPoints: [
-            ...(i < 18 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i < 17 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
           ]
         };
