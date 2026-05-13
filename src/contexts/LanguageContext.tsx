@@ -34,6 +34,11 @@ const translations = {
     ecoParkFullDesc: "Zahiriddin Muhammad Bobur nomidagi Toshkent markaziy eko-bog'i (Eko bog') — shahrimizning qoq markazidagi zamonaviy dam olish maskanidir. 2017-yilda ochilgan ushbu bog' ekologik toza materiallardan foydalangan holda barpo etilgan. Bu yerda sun'iy ko'l, sayr qilish yo'laklari, sport maydonchalari va bolalar uchun o'yin zonalari mavjud.",
     forward: "OLDINGA",
     backward: "ORTGA",
+    contactUs: "Bog'lanish",
+    developer: "KMI Jamoa",
+    phone: "Telefon",
+    email: "Email",
+    socials: "Ijtimoiy tarmoqlar",
   },
   ru: {
     heroTitle: "Добро пожаловать в виртуальное путешествие",
@@ -66,6 +71,11 @@ const translations = {
     ecoParkFullDesc: "Центральный эко-парк Ташкента имени Захириддина Мухаммада Бабура (Эко-парк) — современное место отдыха в самом центре города. Открытый в 2017 году, парк был построен с использованием экологически чистых материалов. Здесь есть искусственное озеро, прогулочные дорожки и спортивные площадки.",
     forward: "ВПЕРЕД",
     backward: "НАЗАД",
+    contactUs: "Контакты",
+    developer: "KMI Jamoa",
+    phone: "Телефон",
+    email: "Почта",
+    socials: "Социальные сети",
   },
   en: {
     heroTitle: "Welcome to the Virtual Journey",
@@ -98,6 +108,11 @@ const translations = {
     ecoParkFullDesc: "The Tashkent Central Eco Park named after Zahiriddin Muhammad Babur (Eco Park) is a modern recreation destination in the heart of the city. Opened in 2017, the park was built using environmentally friendly materials. It features an artificial lake, walking paths, and sports fields.",
     forward: "FORWARD",
     backward: "BACKWARD",
+    contactUs: "Contact",
+    developer: "KMI Jamoa",
+    phone: "Phone",
+    email: "Email",
+    socials: "Social Networks",
   },
 };
 
