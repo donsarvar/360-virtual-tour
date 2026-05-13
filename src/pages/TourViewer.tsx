@@ -98,6 +98,21 @@ const TourViewer = () => {
       }
       return botanikaScenes;
     }
+    
+    if (parkId === "ecopark") {
+      const ecoScenes: Record<string, any> = {};
+      for (let i = 1; i <= 18; i++) {
+        ecoScenes[i.toString()] = {
+          url: `/ecopark/${i}.jpg?v=4`,
+          navPoints: [
+            ...(i < 18 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
+          ]
+        };
+      }
+      return ecoScenes;
+    }
+
     return { "1": { url: `/${parkId}/image1.jpg`, navPoints: [] } };
   };
 
