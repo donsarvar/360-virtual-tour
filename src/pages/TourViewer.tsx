@@ -113,6 +113,20 @@ const TourViewer = () => {
       return ecoScenes;
     }
 
+    if (parkId === "islamic-center") {
+      const islomScenes: Record<string, any> = {};
+      for (let i = 1; i <= 17; i++) {
+        islomScenes[i.toString()] = {
+          url: `/islamic-center/${i}.jpg?v=2`,
+          navPoints: [
+            ...(i < 17 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
+          ]
+        };
+      }
+      return islomScenes;
+    }
+
     return { "1": { url: `/${parkId}/image1.jpg`, navPoints: [] } };
   };
 
