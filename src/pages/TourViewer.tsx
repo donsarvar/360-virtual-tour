@@ -101,11 +101,11 @@ const TourViewer = () => {
     
     if (parkId === "ecopark") {
       const ecoScenes: Record<string, any> = {};
-      for (let i = 1; i <= 22; i++) {
+      for (let i = 1; i <= 21; i++) {
         ecoScenes[i.toString()] = {
-          url: `/ecopark/${i}.jpg?v=2`,
+          url: `/ecopark/${i}.jpg?v=3`,
           navPoints: [
-            ...(i < 22 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i < 21 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
           ]
         };
