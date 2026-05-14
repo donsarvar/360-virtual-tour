@@ -16,12 +16,21 @@ const getAqiStatus = (aqi: number): AirQualityData["status"] => {
   return "very-unhealthy";
 };
 
-const getStatusColor = (status: AirQualityData["status"]) => {
+const getStatusTextColor = (status: AirQualityData["status"]) => {
   switch (status) {
-    case "good": return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-    case "moderate": return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
-    case "unhealthy": return "text-orange-500 bg-orange-500/10 border-orange-500/20";
-    case "very-unhealthy": return "text-red-500 bg-red-500/10 border-red-500/20";
+    case "good": return "text-emerald-400";
+    case "moderate": return "text-yellow-400";
+    case "unhealthy": return "text-orange-500";
+    case "very-unhealthy": return "text-red-500";
+  }
+};
+
+const getStatusBorderColor = (status: AirQualityData["status"]) => {
+  switch (status) {
+    case "good": return "border-emerald-400/40";
+    case "moderate": return "border-yellow-400/40";
+    case "unhealthy": return "border-orange-500/40";
+    case "very-unhealthy": return "border-red-500/40";
   }
 };
 
@@ -84,18 +93,18 @@ export const AirQualityWidget = ({ lat = 41.3111, lon = 69.2406, className = "" 
       onMouseLeave={() => setExpanded(false)}
       onClick={() => setExpanded(!expanded)}
     >
-      <div className={`glass rounded-2xl border ${getStatusColor(data.status)} cursor-pointer transition-all duration-300 shadow-lg overflow-hidden`}>
+      <div className={`glass-strong rounded-2xl border ${getStatusBorderColor(data.status)} cursor-pointer transition-all duration-300 shadow-2xl overflow-hidden bg-black/60 backdrop-blur-xl`}>
         {/* Main Badge */}
         <div className="flex items-center gap-3 px-4 py-2.5">
-          <div className="flex items-center justify-center p-1.5 rounded-full bg-white/10">
+          <div className={`flex items-center justify-center p-1.5 rounded-full bg-white/10 ${getStatusTextColor(data.status)}`}>
             {getStatusIcon(data.status)}
           </div>
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-1">
+            <div className={`flex items-baseline gap-1 ${getStatusTextColor(data.status)}`}>
               <span className="font-display font-bold text-lg leading-none">{data.aqi}</span>
               <span className="text-[10px] uppercase tracking-wider opacity-80 font-bold">AQI</span>
             </div>
-            <span className="text-[10px] font-medium tracking-wide uppercase opacity-90">
+            <span className={`text-[10px] font-bold tracking-wide uppercase ${getStatusTextColor(data.status)}/90`}>
               {statusText[data.status][lang as "uz" | "ru" | "en"]}
             </span>
           </div>
