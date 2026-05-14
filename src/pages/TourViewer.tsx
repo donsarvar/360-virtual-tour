@@ -229,7 +229,7 @@ const TourViewer = () => {
         </div>
 
         {/* IQAir Air Quality Widget */}
-        <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-30 pointer-events-auto">
+        <div className="absolute top-[84px] left-6 sm:top-auto sm:bottom-10 sm:left-10 z-30 pointer-events-auto">
           <AirQualityWidget />
         </div>
 
