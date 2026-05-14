@@ -89,11 +89,31 @@ export const AirQualityWidget = ({ lat = 41.3111, lon = 69.2406, className = "" 
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       className={`relative z-50 ${className}`}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
-      onClick={() => setExpanded(!expanded)}
     >
-      <div className={`glass-strong rounded-2xl border ${getStatusBorderColor(data.status)} cursor-pointer transition-all duration-300 shadow-2xl overflow-hidden bg-black/60 backdrop-blur-xl`}>
+      <div 
+        onClick={() => setExpanded(!expanded)}
+        className={`glass-strong rounded-2xl border ${getStatusBorderColor(data.status)} cursor-pointer transition-all duration-300 shadow-2xl overflow-hidden bg-black/60 backdrop-blur-xl flex flex-col`}
+      >
+        {/* Expanded Details - Top (For desktop bottom placement) */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-4 py-3 bg-black/20 backdrop-blur-md border-b border-white/10 order-first sm:block hidden"
+            >
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs text-white/70">PM2.5:</span>
+                <span className="text-xs font-bold text-white">{data.pm25} μg/m³</span>
+              </div>
+              <p className="text-[10px] text-white/50 leading-tight">
+                Tashkent City Air Quality Index. Based on real-time sensor data.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Main Badge */}
         <div className="flex items-center gap-3 px-4 py-2.5">
           <div className={`flex items-center justify-center p-1.5 rounded-full bg-white/10 ${getStatusTextColor(data.status)}`}>
@@ -110,21 +130,21 @@ export const AirQualityWidget = ({ lat = 41.3111, lon = 69.2406, className = "" 
           </div>
         </div>
 
-        {/* Expanded Details */}
+        {/* Expanded Details - Bottom (For mobile top placement) */}
         <AnimatePresence>
           {expanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="border-t border-white/10 px-4 py-3 bg-black/20 backdrop-blur-md"
+              className="px-4 py-3 bg-black/20 backdrop-blur-md border-t border-white/10 sm:hidden"
             >
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs text-white/70">PM2.5:</span>
-                <span className="text-xs font-bold text-white">{data.pm25} μg/m³</span>
+                <span className={`text-xs font-bold text-white`}>{data.pm25} μg/m³</span>
               </div>
               <p className="text-[10px] text-white/50 leading-tight">
-                Tashkent City Air Quality Index (IQAir standard). Updates in real-time.
+                Tashkent City Air Quality Index. Based on real-time sensor data.
               </p>
             </motion.div>
           )}
