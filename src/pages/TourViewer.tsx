@@ -102,11 +102,11 @@ const TourViewer = () => {
     
     if (parkId === "ecopark") {
       const ecoScenes: Record<string, any> = {};
-      for (let i = 1; i <= 18; i++) {
+      for (let i = 1; i <= 16; i++) {
         ecoScenes[i.toString()] = {
           url: `/ecopark/${i}.webp?v=1`,
           navPoints: [
-            ...(i < 18 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i < 16 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
           ]
         };
@@ -116,11 +116,11 @@ const TourViewer = () => {
 
     if (parkId === "islamic-center") {
       const islomScenes: Record<string, any> = {};
-      for (let i = 1; i <= 17; i++) {
+      for (let i = 1; i <= 15; i++) {
         islomScenes[i.toString()] = {
           url: `/islamic-center/${i}.webp?v=1`,
           navPoints: [
-            ...(i < 17 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
+            ...(i < 15 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
           ]
         };
