@@ -173,8 +173,6 @@ const TourViewer = () => {
 
   const [yaw, setYaw] = useState(0);
 
-  if (isInitialLoading) { return <BrandLoader onComplete={() => {}} />; }
-
   const forwardPoint = currentSceneData?.navPoints?.find((p: any) => p.label === "OLDINGA");
   const backwardPoint = currentSceneData?.navPoints?.find((p: any) => p.label === "ORTGA");
 
@@ -193,6 +191,8 @@ const TourViewer = () => {
       img2.src = backwardUrl;
     }
   }, [forwardUrl, backwardUrl]);
+
+  if (isInitialLoading) { return <BrandLoader onComplete={() => {}} />; }
 
   return (
     <div className="fixed inset-0 bg-black">
