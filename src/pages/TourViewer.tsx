@@ -103,7 +103,7 @@ const TourViewer = () => {
       const ecoScenes: Record<string, any> = {};
       for (let i = 1; i <= 18; i++) {
         ecoScenes[i.toString()] = {
-          url: `/ecopark/${i}.jpg?v=4`,
+          url: `/ecopark/${i}.webp?v=1`,
           navPoints: [
             ...(i < 18 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
@@ -117,7 +117,7 @@ const TourViewer = () => {
       const islomScenes: Record<string, any> = {};
       for (let i = 1; i <= 17; i++) {
         islomScenes[i.toString()] = {
-          url: `/islamic-center/${i}.jpg?v=2`,
+          url: `/islamic-center/${i}.webp?v=1`,
           navPoints: [
             ...(i < 17 ? [{ to: (i + 1).toString(), label: "OLDINGA" }] : []),
             ...(i > 1 ? [{ to: (i - 1).toString(), label: "ORTGA" }] : []),
