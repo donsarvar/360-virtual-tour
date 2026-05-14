@@ -173,10 +173,26 @@ const TourViewer = () => {
 
   const [yaw, setYaw] = useState(0);
 
-  if (isInitialLoading) { return <BrandLoader />; }
-
   const forwardPoint = currentSceneData?.navPoints?.find((p: any) => p.label === "OLDINGA");
   const backwardPoint = currentSceneData?.navPoints?.find((p: any) => p.label === "ORTGA");
+
+  // String dependencies to avoid infinite re-renders
+  const forwardUrl = forwardPoint ? scenes[forwardPoint.to]?.url : null;
+  const backwardUrl = backwardPoint ? scenes[backwardPoint.to]?.url : null;
+
+  // Aklli Preload: Keyingi va oldingi rasmlarni orqa fonda xotiraga yuklab qo'yish
+  useEffect(() => {
+    if (forwardUrl) {
+      const img1 = new Image();
+      img1.src = forwardUrl; // Brauzer keshi (xotirasi) ga yozish
+    }
+    if (backwardUrl) {
+      const img2 = new Image();
+      img2.src = backwardUrl;
+    }
+  }, [forwardUrl, backwardUrl]);
+
+  if (isInitialLoading) { return <BrandLoader onComplete={() => {}} />; }
 
   return (
     <div className="fixed inset-0 bg-black">

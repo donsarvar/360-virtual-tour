@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import backgroundImage from "@/assets/park-botanika.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const BrandLoader = ({ onComplete }: { onComplete: () => void }) => {
+const BrandLoader = ({ onComplete }: { onComplete?: () => void }) => {
   const { t } = useLanguage();
   const [progress, setProgress] = useState(0);
 
@@ -12,7 +12,7 @@ const BrandLoader = ({ onComplete }: { onComplete: () => void }) => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(onComplete, 400);
+          if (onComplete) setTimeout(onComplete, 400);
           return 100;
         }
         return prev + 2;
