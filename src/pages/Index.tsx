@@ -26,14 +26,14 @@ const Index = () => {
         
         {/* Footer */}
         <footer className="py-4 sm:py-8 border-t border-white/5 relative">
-          <div className="container mx-auto px-4 flex flex-row items-center justify-between gap-2 sm:gap-4">
-            <p className="text-white/50 text-[9px] sm:text-xs font-body tracking-wider uppercase m-0 leading-tight">
-              © 2026 Tashkent360. {t.allRightsReserved}
+          <div className="container mx-auto px-4 flex flex-row items-center justify-between gap-4">
+            <p className="text-white/50 text-xs sm:text-sm font-body tracking-wider uppercase m-0">
+              © 2026 Tashkent360<span className="hidden sm:inline">. {t.allRightsReserved}</span>
             </p>
             
             <button 
               onClick={() => setShowContact(true)}
-              className="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-accent hover:text-white transition-colors bg-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10 hover:bg-white/10 shrink-0"
+              className="text-xs sm:text-sm font-bold uppercase tracking-widest text-accent hover:text-white transition-colors bg-white/5 px-4 py-2 sm:px-6 rounded-full border border-white/10 hover:bg-white/10 shrink-0"
             >
               {t.contactUs}
             </button>
