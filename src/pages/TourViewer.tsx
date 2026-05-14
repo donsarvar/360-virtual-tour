@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { gsap } from "gsap";
 import LocationTracker from "@/components/LocationTracker";
 import BrandLoader from "@/components/BrandLoader";
+import { AirQualityWidget } from "@/components/AirQualityWidget";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
@@ -225,6 +226,11 @@ const TourViewer = () => {
           </motion.button>
           <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setShowInfo(!showInfo)}><Info className="w-5 h-5 text-accent" /></motion.button>
           <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setSoundOn(!soundOn)}>{soundOn ? <Volume2 className="w-5 h-5 text-white" /> : <VolumeX className="w-5 h-5 text-white" />}</motion.button>
+        </div>
+
+        {/* IQAir Air Quality Widget */}
+        <div className="absolute top-[84px] left-6 sm:top-auto sm:bottom-10 sm:left-10 z-30 pointer-events-auto">
+          <AirQualityWidget />
         </div>
 
         {/* Navigation Hub - Hidden when Map is open on Mobile */}
