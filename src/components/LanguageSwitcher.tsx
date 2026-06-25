@@ -15,7 +15,7 @@ const LanguageSwitcher = () => {
         <button
           key={l.code}
           onClick={() => setLang(l.code)}
-          className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 ${
+          className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider transition-all duration-300 ${
             lang === l.code
               ? "bg-accent text-accent-foreground"
               : "text-muted-foreground hover:text-foreground"
