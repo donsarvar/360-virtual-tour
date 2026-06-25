@@ -64,12 +64,26 @@ export default function ProfilePage() {
     ? user.email.slice(0, 2).toUpperCase()
     : "U";
 
-  const joinedDate = user?.metadata?.creationTime
-    ? new Date(user.metadata.creationTime).toLocaleDateString(
-        lang === "uz" ? "uz-UZ" : lang === "ru" ? "ru-RU" : "en-US",
-        { year: "numeric", month: "long", day: "numeric" }
-      )
-    : tr.unknown;
+  const getFormattedDate = (dateStr: string | undefined) => {
+    if (!dateStr) return tr.unknown;
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    const monthsUz = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"];
+    const monthsRu = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+    const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    if (lang === "uz") {
+      return `${day}-${monthsUz[date.getMonth()]}, ${year}`;
+    } else if (lang === "ru") {
+      return `${day} ${monthsRu[date.getMonth()]} ${year} г.`;
+    } else {
+      return `${monthsEn[date.getMonth()]} ${day}, ${year}`;
+    }
+  };
+
+  const joinedDate = getFormattedDate(user?.metadata?.creationTime);
 
   const handleLogout = async () => {
     try {
