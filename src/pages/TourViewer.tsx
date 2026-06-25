@@ -61,25 +61,9 @@ const TourViewer = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const authTr = authWallTranslations[lang] || authWallTranslations.uz;
-
-  useEffect(() => {
-    if (user) {
-      setShowAuthWall(false);
-      return;
-    }
-
-    // Start 15s timer for non-logged-in users
-    const timer = setTimeout(() => {
-      setShowAuthWall(true);
-    }, 15000);
-
-    return () => clearTimeout(timer);
-  }, [user, currentSceneId]);
-  
   const [textureA, setTextureA] = useState<THREE.Texture | null>(null);
   const [textureB, setTextureB] = useState<THREE.Texture | null>(null);
   const [activeBuffer, setActiveBuffer] = useState<"A" | "B">("A");
@@ -96,6 +80,20 @@ const TourViewer = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const textureLoader = useRef(new THREE.TextureLoader());
+
+  useEffect(() => {
+    if (user) {
+      setShowAuthWall(false);
+      return;
+    }
+
+    // Start 15s timer for non-logged-in users
+    const timer = setTimeout(() => {
+      setShowAuthWall(true);
+    }, 15000);
+
+    return () => clearTimeout(timer);
+  }, [user, currentSceneId]);
 
   useEffect(() => {
     if (!parkId) return;
