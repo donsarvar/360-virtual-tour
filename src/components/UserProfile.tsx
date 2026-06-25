@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut, User, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const localTranslations = {
   uz: {
@@ -49,6 +50,7 @@ const localTranslations = {
 export default function UserProfile() {
   const { user, loading, loginWithGoogle, logout } = useAuth();
   const { lang } = useLanguage();
+  const navigate = useNavigate();
   const t = localTranslations[lang] || localTranslations.uz;
 
   const handleLogin = async () => {
@@ -131,7 +133,10 @@ export default function UserProfile() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-white/10 my-1" />
-        <DropdownMenuItem className="focus:bg-white/10 focus:text-white rounded-lg flex items-center gap-2 cursor-pointer py-2">
+        <DropdownMenuItem 
+          onClick={() => navigate("/profile")}
+          className="focus:bg-white/10 focus:text-white rounded-lg flex items-center gap-2 cursor-pointer py-2"
+        >
           <User className="mr-2 h-4 w-4 text-accent" />
           <span className="text-sm">{t.account}</span>
         </DropdownMenuItem>

@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
 import TourViewer from "./pages/TourViewer";
 import NotFound from "./pages/NotFound";
+import ProfilePage from "./pages/ProfilePage";
 
 // Admin Imports
 import AdminGuard from "@/components/admin/AdminGuard";
@@ -33,6 +34,7 @@ const App = () => (
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/tour/:parkId" element={<TourViewer />} />
+              <Route path="/profile" element={<ProfilePage />} />
               
               {/* Protected Admin Routes */}
               <Route path="/admin" element={<AdminGuard><AdminLayout><AdminDashboard /></AdminLayout></AdminGuard>} />
