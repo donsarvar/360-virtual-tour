@@ -10,6 +10,15 @@ import Index from "./pages/Index";
 import TourViewer from "./pages/TourViewer";
 import NotFound from "./pages/NotFound";
 
+// Admin Imports
+import AdminGuard from "@/components/admin/AdminGuard";
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ParksList from "./pages/admin/ParksList";
+import ParkEditor from "./pages/admin/ParkEditor";
+import ScenesManager from "./pages/admin/ScenesManager";
+import UsersList from "./pages/admin/UsersList";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,8 +30,19 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/tour/:parkId" element={<TourViewer />} />
+              
+              {/* Protected Admin Routes */}
+              <Route path="/admin" element={<AdminGuard><AdminLayout><AdminDashboard /></AdminLayout></AdminGuard>} />
+              <Route path="/admin/parks" element={<AdminGuard><AdminLayout><ParksList /></AdminLayout></AdminGuard>} />
+              <Route path="/admin/parks/new" element={<AdminGuard><AdminLayout><ParkEditor /></AdminLayout></AdminGuard>} />
+              <Route path="/admin/parks/:parkId" element={<AdminGuard><AdminLayout><ParkEditor /></AdminLayout></AdminGuard>} />
+              <Route path="/admin/parks/:parkId/scenes" element={<AdminGuard><AdminLayout><ScenesManager /></AdminLayout></AdminGuard>} />
+              <Route path="/admin/users" element={<AdminGuard><AdminLayout><UsersList /></AdminLayout></AdminGuard>} />
+              
+              {/* Fallback */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -9,7 +9,9 @@ import {
   signInWithCredential,
   GoogleAuthProvider
 } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { auth, googleProvider, db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+
 
 interface AuthContextType {
   user: User | null;
@@ -34,6 +36,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        setDoc(userDocRef, {
+          displayName: currentUser.displayName || "",
+          email: currentUser.email || "",
+          photoURL: currentUser.photoURL || "",
+          lastLogin: new Date()
+        }, { merge: true }).catch(err => {
+          console.error("Error saving user to Firestore:", err);
+        });
+      }
     }, (error) => {
       console.error("Auth state change error:", error);
       setLoading(false);
