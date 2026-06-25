@@ -1,4 +1,5 @@
 import LanguageSwitcher from "./LanguageSwitcher";
+import UserProfile from "./UserProfile";
 
 const Header = () => {
   return (
@@ -11,7 +12,10 @@ const Header = () => {
             <span className="text-gradient ml-1">360</span>
           </span>
         </div>
-        <LanguageSwitcher />
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          <UserProfile />
+        </div>
       </div>
     </header>
   );
