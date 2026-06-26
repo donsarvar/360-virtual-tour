@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import ParkSelection from "@/components/ParkSelection";
@@ -6,14 +6,36 @@ import BrandLoader from "@/components/BrandLoader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Phone, Mail, Instagram, Send, Code2 } from "lucide-react";
+import heroImage from "@/assets/hero-tashkent.jpg";
 
 const Index = () => {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [showContact, setShowContact] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loaderFinished, setLoaderFinished] = useState(false);
+
+  useEffect(() => {
+    // Preload hero image to prevent black background flash
+    const img = new Image();
+    img.src = heroImage;
+    img.onload = () => {
+      setImageLoaded(true);
+    };
+    img.onerror = () => {
+      // Fallback
+      setImageLoaded(true);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (imageLoaded && loaderFinished) {
+      setLoading(false);
+    }
+  }, [imageLoaded, loaderFinished]);
 
   const handleLoaderComplete = useCallback(() => {
-    setLoading(false);
+    setLoaderFinished(true);
   }, []);
 
   return (

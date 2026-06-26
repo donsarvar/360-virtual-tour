@@ -61,6 +61,7 @@ const TourViewer = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [showAuthWall, setShowAuthWall] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const authTr = authWallTranslations[lang] || authWallTranslations.uz;
@@ -96,6 +97,7 @@ const TourViewer = () => {
     async function loadTourData() {
       try {
         setIsInitialLoading(true);
+        setLoadingProgress(0);
         const parkDocRef = doc(db, "parks", parkId!);
         const parkSnap = await getDoc(parkDocRef);
         
@@ -155,14 +157,26 @@ const TourViewer = () => {
           
           setCurrentSceneId(firstSceneId);
           
-          textureLoader.current.load(firstSceneUrl, (tex) => {
-            tex.minFilter = THREE.LinearFilter;
-            tex.generateMipmaps = false;
-            setTextureA(tex);
-            setTimeout(() => {
+          textureLoader.current.load(
+            firstSceneUrl,
+            (tex) => {
+              tex.minFilter = THREE.LinearFilter;
+              tex.generateMipmaps = false;
+              setTextureA(tex);
+              setLoadingProgress(100);
+            },
+            (xhr) => {
+              if (xhr.total > 0) {
+                const percent = Math.round((xhr.loaded / xhr.total) * 100);
+                setLoadingProgress(percent);
+              }
+            },
+            (err) => {
+              console.error("Error loading texture:", err);
+              // Fallback to let them in
               setIsInitialLoading(false);
-            }, 500);
-          });
+            }
+          );
         } else {
           toast.error("Park topilmadi.");
           navigate("/");
@@ -293,7 +307,7 @@ const TourViewer = () => {
     }
   }, [forwardUrl, backwardUrl]);
 
-  if (isInitialLoading) { return <BrandLoader onComplete={() => {}} />; }
+  if (isInitialLoading) { return <BrandLoader progress={loadingProgress} onComplete={() => setIsInitialLoading(false)} />; }
 
   return (
     <div className="fixed inset-0 bg-black">

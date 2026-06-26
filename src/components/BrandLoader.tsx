@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import backgroundImage from "@/assets/park-botanika.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const BrandLoader = ({ onComplete }: { onComplete?: () => void }) => {
+const BrandLoader = ({ onComplete, progress: customProgress }: { onComplete?: () => void; progress?: number }) => {
   const { t } = useLanguage();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    if (customProgress !== undefined) return;
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -19,11 +20,19 @@ const BrandLoader = ({ onComplete }: { onComplete?: () => void }) => {
       });
     }, 30);
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, [onComplete, customProgress]);
+
+  useEffect(() => {
+    if (customProgress !== undefined && customProgress >= 100) {
+      if (onComplete) setTimeout(onComplete, 400);
+    }
+  }, [customProgress, onComplete]);
+
+  const displayProgress = customProgress !== undefined ? customProgress : progress;
 
   return (
     <AnimatePresence>
-      {progress <= 100 && (
+      {displayProgress <= 100 && (
         <motion.div
           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"
           exit={{ opacity: 0 }}
@@ -51,11 +60,11 @@ const BrandLoader = ({ onComplete }: { onComplete?: () => void }) => {
             <div className="w-48 h-1 rounded-full bg-muted overflow-hidden">
               <motion.div
                 className="h-full rounded-full bg-accent"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${displayProgress}%` }}
               />
             </div>
             <p className="text-muted-foreground text-sm font-body tracking-widest uppercase">
-              {progress < 100 ? t.tourStartMessage : t.tayyor}
+              {displayProgress < 100 ? `${t.tourStartMessage} (${displayProgress}%)` : t.tayyor}
             </p>
           </motion.div>
         </motion.div>
