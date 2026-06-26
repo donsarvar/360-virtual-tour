@@ -56,7 +56,7 @@ const TourViewer = () => {
   const { parkId } = useParams();
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
-  const { user, loginWithGoogle } = useAuth();
+  const { user, loading: authSessionLoading, loginWithGoogle } = useAuth();
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showMap, setShowMap] = useState(false);
@@ -82,18 +82,14 @@ const TourViewer = () => {
   const textureLoader = useRef(new THREE.TextureLoader());
 
   useEffect(() => {
-    if (user) {
-      setShowAuthWall(false);
-      return;
+    if (!authSessionLoading) {
+      if (!user) {
+        setShowAuthWall(true);
+      } else {
+        setShowAuthWall(false);
+      }
     }
-
-    // Start 15s timer for non-logged-in users
-    const timer = setTimeout(() => {
-      setShowAuthWall(true);
-    }, 15000);
-
-    return () => clearTimeout(timer);
-  }, [user, currentSceneId]);
+  }, [user, authSessionLoading]);
 
   useEffect(() => {
     if (!parkId) return;
