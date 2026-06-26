@@ -94,6 +94,10 @@ const TourViewer = () => {
 
   useEffect(() => {
     if (!parkId) return;
+    if (authSessionLoading) return;
+
+    let progressInterval: any;
+
     async function loadTourData() {
       try {
         setIsInitialLoading(true);
@@ -104,6 +108,11 @@ const TourViewer = () => {
         if (parkSnap.exists()) {
           const pData = parkSnap.data();
           setParkData(pData);
+          
+          if (!user) {
+            setIsInitialLoading(false);
+            return;
+          }
           
           const scenesSnap = await getDocs(query(collection(db, "parks", parkId!, "scenes"), orderBy("order", "asc")));
           const loadedScenes: Record<string, any> = {};
@@ -160,6 +169,7 @@ const TourViewer = () => {
           textureLoader.current.load(
             firstSceneUrl,
             (tex) => {
+              if (progressInterval) clearInterval(progressInterval);
               tex.minFilter = THREE.LinearFilter;
               tex.generateMipmaps = false;
               setTextureA(tex);
@@ -169,11 +179,19 @@ const TourViewer = () => {
               if (xhr.total > 0) {
                 const percent = Math.round((xhr.loaded / xhr.total) * 100);
                 setLoadingProgress(percent);
+              } else {
+                if (!progressInterval) {
+                  let simulated = 0;
+                  progressInterval = setInterval(() => {
+                    simulated = Math.min(simulated + Math.random() * 8, 95);
+                    setLoadingProgress(Math.round(simulated));
+                  }, 150);
+                }
               }
             },
             (err) => {
+              if (progressInterval) clearInterval(progressInterval);
               console.error("Error loading texture:", err);
-              // Fallback to let them in
               setIsInitialLoading(false);
             }
           );
@@ -182,13 +200,18 @@ const TourViewer = () => {
           navigate("/");
         }
       } catch (error) {
+        if (progressInterval) clearInterval(progressInterval);
         console.error("Error loading tour viewer data:", error);
         toast.error("Turni yuklashda xatolik yuz berdi.");
         navigate("/");
       }
     }
     loadTourData();
-  }, [parkId, navigate]);
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [parkId, navigate, user, authSessionLoading]);
 
   useEffect(() => {
     const audioUrl = parkData?.audioUrl;
