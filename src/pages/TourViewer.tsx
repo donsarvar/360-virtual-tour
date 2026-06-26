@@ -12,7 +12,7 @@ import LocationTracker from "@/components/LocationTracker";
 import BrandLoader from "@/components/BrandLoader";
 import { AirQualityWidget } from "@/components/AirQualityWidget";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, getDocs, query, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, query, orderBy, addDoc, updateDoc } from "firebase/firestore";
 import { toast } from "sonner";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
@@ -232,6 +232,58 @@ const TourViewer = () => {
       }
     });
   }, [currentSceneId, scenesList, user]);
+
+  useEffect(() => {
+    if (!user || !parkId) return;
+
+    let docId = "";
+    const startTime = Date.now();
+    
+    async function startSession() {
+      try {
+        const docRef = await addDoc(collection(db, "activity_logs"), {
+          userId: user.uid,
+          userEmail: user.email || "mehmon@tashkent360.uz",
+          userName: user.displayName || "Mehmon",
+          parkId: parkId,
+          enteredAt: new Date(),
+          exitedAt: new Date(),
+          duration: 0,
+          device: window.innerWidth < 768 ? "mobil" : "desktop",
+          createdAt: new Date()
+        });
+        docId = docRef.id;
+      } catch (err) {
+        console.error("Error starting activity log session:", err);
+      }
+    }
+
+    startSession();
+
+    const interval = setInterval(async () => {
+      if (!docId) return;
+      try {
+        const currentDuration = Math.round((Date.now() - startTime) / 1000);
+        await updateDoc(doc(db, "activity_logs", docId), {
+          duration: currentDuration,
+          exitedAt: new Date()
+        });
+      } catch (err) {
+        console.error("Error updating activity log session:", err);
+      }
+    }, 15000);
+
+    return () => {
+      clearInterval(interval);
+      if (docId) {
+        const finalDuration = Math.round((Date.now() - startTime) / 1000);
+        updateDoc(doc(db, "activity_logs", docId), {
+          duration: finalDuration,
+          exitedAt: new Date()
+        }).catch((err) => console.error("Error on unmount activity update:", err));
+      }
+    };
+  }, [user, parkId]);
 
   useEffect(() => {
     const audioUrl = parkData?.audioUrl;

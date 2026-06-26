@@ -167,6 +167,17 @@ export default function AdminDashboard() {
                 </div>
                 <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
               </Link>
+              
+              <Link 
+                to="/admin/analytics"
+                className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <ImageIcon className="w-5 h-5 text-emerald-400" />
+                  <span className="font-semibold text-sm">Foydalanuvchilar faolligi (Analitika)</span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+              </Link>
             </div>
           </div>
 
