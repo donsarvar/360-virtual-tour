@@ -81,6 +81,7 @@ const TourViewer = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const textureLoader = useRef(new THREE.TextureLoader());
+  const preloadedTextures = useRef<Record<string, THREE.Texture>>({});
 
   useEffect(() => {
     if (!authSessionLoading) {
@@ -173,6 +174,7 @@ const TourViewer = () => {
               tex.minFilter = THREE.LinearFilter;
               tex.generateMipmaps = false;
               setTextureA(tex);
+              preloadedTextures.current[firstSceneId] = tex;
               setLoadingProgress(100);
             },
             (xhr) => {
@@ -212,6 +214,24 @@ const TourViewer = () => {
       if (progressInterval) clearInterval(progressInterval);
     };
   }, [parkId, navigate, user, authSessionLoading]);
+
+  useEffect(() => {
+    if (!user || !currentSceneId || !scenesList[currentSceneId]) return;
+
+    const navPoints = scenesList[currentSceneId].navPoints || [];
+    navPoints.forEach((point: any) => {
+      const targetId = point.to;
+      const targetUrl = scenesList[targetId]?.url;
+      
+      if (targetUrl && !preloadedTextures.current[targetId]) {
+        textureLoader.current.load(targetUrl, (tex) => {
+          tex.minFilter = THREE.LinearFilter;
+          tex.generateMipmaps = false;
+          preloadedTextures.current[targetId] = tex;
+        });
+      }
+    });
+  }, [currentSceneId, scenesList, user]);
 
   useEffect(() => {
     const audioUrl = parkData?.audioUrl;
@@ -269,9 +289,7 @@ const TourViewer = () => {
 
     gsap.to(cameraRef.current, { fov: 35, duration: 1.2, ease: "power2.inOut", onUpdate: () => cameraRef.current.updateProjectionMatrix() });
 
-    textureLoader.current.load(nextUrl, (tex) => {
-      tex.minFilter = THREE.LinearFilter;
-      tex.generateMipmaps = false;
+    const applyTextureChange = (tex: THREE.Texture) => {
       if (activeBuffer === "A") setTextureB(tex); else setTextureA(tex);
 
       gsap.to({ opA: opacityA, opB: opacityB, scale: 1 }, {
@@ -295,7 +313,28 @@ const TourViewer = () => {
           });
         }
       });
-    });
+    };
+
+    const cachedTex = preloadedTextures.current[targetId];
+    if (cachedTex) {
+      applyTextureChange(cachedTex);
+    } else {
+      textureLoader.current.load(
+        nextUrl,
+        (tex) => {
+          tex.minFilter = THREE.LinearFilter;
+          tex.generateMipmaps = false;
+          preloadedTextures.current[targetId] = tex;
+          applyTextureChange(tex);
+        },
+        undefined,
+        (err) => {
+          console.error("Error loading texture:", err);
+          setIsTransitioning(false);
+          gsap.to(cameraRef.current, { fov: 75, duration: 0.5, ease: "power2.out", onUpdate: () => cameraRef.current.updateProjectionMatrix() });
+        }
+      );
+    }
   };
 
   const handleAuthWallLogin = async () => {
