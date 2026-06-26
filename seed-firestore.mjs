@@ -77,6 +77,7 @@ async function seedData() {
     // Park hujjatini yozish
     await setDoc(doc(db, "parks", id), {
       ...parkData,
+      totalScenes,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

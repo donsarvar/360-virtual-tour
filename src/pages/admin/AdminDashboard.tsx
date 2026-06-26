@@ -29,11 +29,24 @@ export default function AdminDashboard() {
         const parksSnapshot = await getDocs(collection(db, "parks"));
         const parksCount = parksSnapshot.size;
 
-        let totalScenes = 0;
-        parksSnapshot.forEach(doc => {
-          const data = doc.data();
-          totalScenes += data.totalScenes || 0;
+        // Fetch scenes count for each park in parallel
+        const scenesCountPromises = parksSnapshot.docs.map(async (parkDoc) => {
+          const data = parkDoc.data();
+          if (data.totalScenes !== undefined) {
+            return data.totalScenes;
+          }
+          // Fallback: Query the subcollection count dynamically
+          try {
+            const scenesSnapshot = await getDocs(collection(db, "parks", parkDoc.id, "scenes"));
+            return scenesSnapshot.size;
+          } catch (err) {
+            console.error(`Error fetching scenes for park ${parkDoc.id}:`, err);
+            return 0;
+          }
         });
+
+        const scenesCounts = await Promise.all(scenesCountPromises);
+        const totalScenes = scenesCounts.reduce((sum, count) => sum + count, 0);
 
         // Fetch users
         const usersSnapshot = await getDocs(collection(db, "users"));
