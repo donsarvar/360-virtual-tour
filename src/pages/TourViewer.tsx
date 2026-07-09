@@ -14,6 +14,7 @@ import { AirQualityWidget } from "@/components/AirQualityWidget";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy } from "firebase/firestore";
 import { toast } from "sonner";
+import { getParkFacilities, getAvailableFacilities, FACILITY_LABELS, LEVEL_LABELS } from "@/lib/facilities";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
@@ -413,6 +414,51 @@ const TourViewer = () => {
               <div className="prose prose-invert prose-sm">
                 <p className="text-white/70 leading-relaxed text-lg font-body">{getLocalizedDesc()}</p>
               </div>
+
+              {/* ═══ Sharoitlar belgilari ═══ */}
+              {parkId && getParkFacilities(parkId) && (() => {
+                const facilities = getParkFacilities(parkId)!;
+                const availableKeys = getAvailableFacilities(parkId);
+                const langKey = lang as "uz" | "ru" | "en";
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-xs uppercase tracking-[0.2em] text-accent font-bold">
+                      {lang === "uz" ? "Sharoitlar" : lang === "ru" ? "Удобства" : "Facilities"}
+                    </h3>
+
+                    {/* Mavjud sharoitlar */}
+                    <div className="flex flex-wrap gap-2">
+                      {availableKeys.map(key => (
+                        <span key={key} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold">
+                          <span>{FACILITY_LABELS[key]?.emoji}</span>
+                          <span>{FACILITY_LABELS[key]?.[langKey]}</span>
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Soya, shovqin, narx, ish vaqti */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-white/40 block mb-0.5">🌳 {lang === "uz" ? "Soya" : lang === "ru" ? "Тень" : "Shade"}</span>
+                        <span className="text-white font-semibold">{LEVEL_LABELS.shade_level[facilities.shade_level]?.[langKey]}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-white/40 block mb-0.5">🔊 {lang === "uz" ? "Shovqin" : lang === "ru" ? "Шум" : "Noise"}</span>
+                        <span className="text-white font-semibold">{LEVEL_LABELS.noise_level[facilities.noise_level]?.[langKey]}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-white/40 block mb-0.5">🎫 {lang === "uz" ? "Kirish" : lang === "ru" ? "Вход" : "Entry"}</span>
+                        <span className="text-white font-semibold">{LEVEL_LABELS.entry_fee[facilities.entry_fee]?.[langKey]}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-white/40 block mb-0.5">🕐 {lang === "uz" ? "Ish vaqti" : lang === "ru" ? "Часы" : "Hours"}</span>
+                        <span className="text-white font-semibold">{facilities.working_hours}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
             </div>
           </motion.div>
         )}</AnimatePresence>

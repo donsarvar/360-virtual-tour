@@ -6,6 +6,7 @@ import { useGeoLocation } from "@/hooks/useGeoLocation";
 import { MapPin, Map as MapIcon, ExternalLink, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { getAvailableFacilities, FACILITY_LABELS, LEVEL_LABELS, getParkFacilities } from "@/lib/facilities";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
@@ -189,7 +190,30 @@ const ParkSelection = () => {
                         opacity: isHovered ? 1 : 0,
                       }}
                     >
-                      <p className="text-secondary-foreground/80 mt-3 text-sm md:text-base font-body">
+                      {/* Sharoitlar belgilari */}
+                      {(() => {
+                        const available = getAvailableFacilities(park.id);
+                        const facilities = getParkFacilities(park.id);
+                        const langKey = lang as "uz" | "ru" | "en";
+                        if (available.length === 0) return null;
+                        return (
+                          <div className="flex flex-wrap gap-1.5 mt-3 mb-2">
+                            {available.slice(0, 5).map(key => (
+                              <span key={key} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-[11px] text-white/80 font-medium">
+                                <span>{FACILITY_LABELS[key]?.emoji}</span>
+                                <span className="hidden md:inline">{FACILITY_LABELS[key]?.[langKey]}</span>
+                              </span>
+                            ))}
+                            {facilities && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-[11px] text-white/80 font-medium">
+                                🎫 {LEVEL_LABELS.entry_fee[facilities.entry_fee]?.[langKey]}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      <p className="text-secondary-foreground/80 text-sm md:text-base font-body">
                         {park.desc}
                       </p>
                       <button className="mt-4 px-6 py-2.5 rounded-full bg-accent text-accent-foreground text-sm font-bold tracking-wide hover:scale-105 transition-transform glow-pulse">
