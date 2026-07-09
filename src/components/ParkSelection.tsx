@@ -3,10 +3,11 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
-import { MapPin, Map as MapIcon, ExternalLink, Loader2 } from "lucide-react";
+import { MapPin, Map as MapIcon, ExternalLink, Loader2, Search, Sparkles } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { getAvailableFacilities, FACILITY_LABELS, LEVEL_LABELS, getParkFacilities } from "@/lib/facilities";
+import { parseSearchQuery, SearchFilters } from "@/lib/aiSearch";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
@@ -33,6 +34,11 @@ const ParkSelection = () => {
   // Firestore states
   const [dbParks, setDbParks] = useState<any[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
+  
+  // AI qidiruv statelari
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<SearchFilters | null>(null);
 
   useEffect(() => {
     async function loadParks() {
@@ -91,6 +97,43 @@ const ParkSelection = () => {
       }))
     : defaultParks;
 
+  // Filtrni qo'llash
+  const filteredParks = displayParks.filter(park => {
+    if (!activeFilters) return true;
+    
+    const facilities = getParkFacilities(park.id);
+    if (!facilities) return false;
+
+    // Har bir o'rnatilgan filtrni tekshiramiz
+    for (const [key, value] of Object.entries(activeFilters)) {
+      if (value !== undefined && (facilities as any)[key] !== value) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      setActiveFilters(null);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const filters = await parseSearchQuery(searchQuery);
+      setActiveFilters(Object.keys(filters).length > 0 ? filters : null);
+      
+      // Tahlil uchun (3-bosqich) so'rovni konsolga yozib qo'yamiz
+      console.log(`🔍 [AI Qidiruv] So'rov: "${searchQuery}" -> Filtrlar:`, filters);
+    } catch (err) {
+      console.error("AI Search error:", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <section id="parks" className="py-24 px-6">
       <div className="container mx-auto">
@@ -109,14 +152,65 @@ const ParkSelection = () => {
           </p>
         </motion.div>
 
+        {/* AI Qidiruv Maydoni */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="max-w-2xl mx-auto mb-16 relative z-20"
+        >
+          <form onSubmit={handleSearch} className="relative group">
+            <div className="absolute inset-0 bg-accent/20 rounded-2xl blur-xl group-hover:bg-accent/30 transition-all duration-500" />
+            <div className="relative flex items-center glass-strong border border-white/20 rounded-2xl p-2 shadow-2xl overflow-hidden focus-within:border-accent/50 transition-colors">
+              <div className="pl-4 pr-2 text-accent">
+                {isSearching ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6" />}
+              </div>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={lang === "uz" ? "Qanday park qidiryapsiz? Masalan: bolalar uchun tinch joy..." : "Какой парк вы ищете? Например: тихое место для детей..."}
+                className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/40 h-12 text-base md:text-lg font-body"
+              />
+              <button 
+                type="submit"
+                disabled={isSearching}
+                className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+              >
+                <Search className="w-5 h-5 hidden md:block" />
+                <span className="hidden md:inline">{lang === "uz" ? "Qidirish" : "Искать"}</span>
+                <Search className="w-5 h-5 md:hidden" />
+              </button>
+            </div>
+            {activeFilters && (
+              <div className="absolute -bottom-8 left-0 text-xs text-accent font-medium flex items-center gap-2">
+                <span>✓ {lang === "uz" ? "AI filtri faol" : "AI фильтр активен"}</span>
+                <button type="button" onClick={() => { setSearchQuery(""); setActiveFilters(null); }} className="text-white/50 hover:text-white underline">
+                  {lang === "uz" ? "Bekor qilish" : "Отменить"}
+                </button>
+              </div>
+            )}
+          </form>
+        </motion.div>
+
         {dbLoading && dbParks.length === 0 ? (
           <div className="flex justify-center items-center h-48">
             <Loader2 className="w-8 h-8 animate-spin text-accent" />
           </div>
+        ) : filteredParks.length === 0 ? (
+          <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/10 glass">
+            <Sparkles className="w-12 h-12 text-accent mx-auto mb-4 opacity-50" />
+            <h3 className="text-2xl font-bold text-white mb-2">{lang === "uz" ? "Afsuski, bunday park topilmadi" : "К сожалению, такой парк не найден"}</h3>
+            <p className="text-white/60 mb-6">{lang === "uz" ? "Boshqa so'zlar bilan qidirib ko'ring yoki filtrlarni o'chiring." : "Попробуйте поискать другими словами или отключите фильтры."}</p>
+            <button onClick={() => { setSearchQuery(""); setActiveFilters(null); }} className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors">
+              {lang === "uz" ? "Barcha parklarni ko'rish" : "Посмотреть все парки"}
+            </button>
+          </div>
         ) : (
           /* Expanding Cards */
           <div className="flex flex-col md:flex-row gap-4 h-[500px] md:h-[600px]">
-            {displayParks.map((park, index) => {
+            {filteredParks.map((park, index) => {
               const isHovered = hoveredIndex === index;
               const hasHover = hoveredIndex !== null;
 
