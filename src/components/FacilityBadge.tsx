@@ -1,7 +1,7 @@
 import React from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
-  Wheelchair, 
+  Accessibility, 
   ParkingCircle, 
   Gamepad2, 
   Coffee, 
@@ -16,7 +16,7 @@ import { FACILITY_LABELS, LEVEL_LABELS } from "@/lib/facilities";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const iconMap: Record<string, React.FC<any>> = {
-  has_ramp: Wheelchair,
+  has_ramp: Accessibility,
   has_parking: ParkingCircle,
   has_playground: Gamepad2,
   has_cafe: Coffee,
