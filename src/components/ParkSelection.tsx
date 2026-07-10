@@ -3,11 +3,13 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useGeoLocation } from "@/hooks/useGeoLocation";
-import { MapPin, Map as MapIcon, ExternalLink, Loader2, Search, Sparkles } from "lucide-react";
+import { MapPin, Map as MapIcon, ExternalLink, Loader2, Search, Sparkles, Wheelchair } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
-import { getAvailableFacilities, FACILITY_LABELS, LEVEL_LABELS, getParkFacilities } from "@/lib/facilities";
+import { getAvailableFacilities, getParkFacilities } from "@/lib/facilities";
 import { parseSearchQuery, SearchFilters } from "@/lib/aiSearch";
+import { FacilityBadge, EntryFeeBadge } from "@/components/FacilityBadge";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
@@ -39,6 +41,9 @@ const ParkSelection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [activeFilters, setActiveFilters] = useState<SearchFilters | null>(null);
+
+  // Inklyuzivlik holati
+  const { isInclusiveMode, toggleInclusiveMode } = useAccessibility();
 
   useEffect(() => {
     async function loadParks() {
@@ -99,10 +104,17 @@ const ParkSelection = () => {
 
   // Filtrni qo'llash
   const filteredParks = displayParks.filter(park => {
-    if (!activeFilters) return true;
-    
     const facilities = getParkFacilities(park.id);
     if (!facilities) return false;
+
+    // Agar inklyuziv rejim yoniq bo'lsa, qat'iy filtrlash
+    if (isInclusiveMode) {
+      if (!facilities.has_ramp && !facilities.has_nursing_room && !facilities.child_friendly) {
+        return false;
+      }
+    }
+
+    if (!activeFilters) return true;
 
     // Har bir o'rnatilgan filtrni tekshiramiz
     for (const [key, value] of Object.entries(activeFilters)) {
@@ -152,7 +164,7 @@ const ParkSelection = () => {
           </p>
         </motion.div>
 
-        {/* AI Qidiruv Maydoni */}
+        {/* Inklyuzivlik Toggle va AI Qidiruv Maydoni */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -160,6 +172,28 @@ const ParkSelection = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="max-w-2xl mx-auto mb-16 relative z-20"
         >
+          {/* To'siqsiz muhit Toggle */}
+          <div className="flex justify-center mb-6">
+            <button
+              onClick={toggleInclusiveMode}
+              className={`flex items-center gap-3 px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-xl border ${
+                isInclusiveMode 
+                  ? "bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30 glow-green" 
+                  : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
+              }`}
+            >
+              <div className={`p-1.5 rounded-full ${isInclusiveMode ? "bg-green-500/30" : "bg-white/10"}`}>
+                <Wheelchair className="w-5 h-5" />
+              </div>
+              <span className="tracking-wide">
+                {lang === "uz" ? "To'siqsiz muhit" : "Доступная среда"}
+              </span>
+              {isInclusiveMode && (
+                <span className="ml-2 w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              )}
+            </button>
+          </div>
+
           <form onSubmit={handleSearch} className="relative group">
             <div className="absolute inset-0 bg-accent/20 rounded-2xl blur-xl group-hover:bg-accent/30 transition-all duration-500" />
             <div className="relative flex items-center glass-strong border border-white/20 rounded-2xl p-2 shadow-2xl overflow-hidden focus-within:border-accent/50 transition-colors">
@@ -284,24 +318,24 @@ const ParkSelection = () => {
                         opacity: isHovered ? 1 : 0,
                       }}
                     >
-                      {/* Sharoitlar belgilari */}
+                      {/* Premium Sharoitlar belgilari */}
                       {(() => {
                         const available = getAvailableFacilities(park.id);
                         const facilities = getParkFacilities(park.id);
-                        const langKey = lang as "uz" | "ru" | "en";
                         if (available.length === 0) return null;
                         return (
-                          <div className="flex flex-wrap gap-1.5 mt-3 mb-2">
-                            {available.slice(0, 5).map(key => (
-                              <span key={key} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-[11px] text-white/80 font-medium">
-                                <span>{FACILITY_LABELS[key]?.emoji}</span>
-                                <span className="hidden md:inline">{FACILITY_LABELS[key]?.[langKey]}</span>
-                              </span>
-                            ))}
+                          <div className="flex flex-wrap items-center gap-2 mt-4 mb-3">
                             {facilities && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-[11px] text-white/80 font-medium">
-                                🎫 {LEVEL_LABELS.entry_fee[facilities.entry_fee]?.[langKey]}
-                              </span>
+                              <EntryFeeBadge feeType={facilities.entry_fee} variant="card" />
+                            )}
+                            <div className="h-4 w-[1px] bg-white/20 mx-1" />
+                            {available.slice(0, 5).map(key => (
+                              <FacilityBadge key={key} facilityKey={key} variant="card" />
+                            ))}
+                            {available.length > 5 && (
+                              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-white/50 font-bold">
+                                +{available.length - 5}
+                              </div>
                             )}
                           </div>
                         );

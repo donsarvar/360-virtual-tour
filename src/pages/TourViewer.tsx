@@ -3,7 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ChevronUp, ChevronDown, Map as MapIcon } from "lucide-react";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { ArrowLeft, Volume2, VolumeX, MapPin, X, Info, ChevronUp, ChevronDown, Map as MapIcon, Accessibility, Ear } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Sphere, OrbitControls, Html, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -15,6 +16,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy } from "firebase/firestore";
 import { toast } from "sonner";
 import { getParkFacilities, getAvailableFacilities, FACILITY_LABELS, LEVEL_LABELS } from "@/lib/facilities";
+import { FacilityBadge, EntryFeeBadge } from "@/components/FacilityBadge";
 
 import parkBotanika from "@/assets/park-botanika.jpg";
 import parkIslamicCenter from "@/assets/park-islamic-center.png";
@@ -58,6 +60,7 @@ const TourViewer = () => {
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
   const { user, loading: authSessionLoading, loginWithGoogle } = useAuth();
+  const { isInclusiveMode } = useAccessibility();
   const [soundOn, setSoundOn] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showMap, setShowMap] = useState(false);
@@ -234,6 +237,34 @@ const TourViewer = () => {
 
   const currentSceneData = scenesList[currentSceneId] || scenesList["1"];
 
+  // Ovozli Gid (Audio Description) Logikasi
+  useEffect(() => {
+    if (isInclusiveMode && !isInitialLoading && currentSceneData) {
+      // Brauzerni gapirtirish (Speech Synthesis API)
+      window.speechSynthesis.cancel(); // oldingi gaplarni to'xtatish
+      
+      const langCodes = { uz: "uz-UZ", ru: "ru-RU", en: "en-US" };
+      let text = "";
+      
+      if (lang === "uz") text = `Siz hozir ${getParkName()}ning ${currentSceneId}-sahnasidasiz. Bu yerdan boshqa yo'nalishlarga o'tish mumkin. Atrofda qulayliklar mavjud.`;
+      if (lang === "ru") text = `Вы сейчас находитесь на сцене ${currentSceneId} парка ${getParkName()}. Отсюда можно перейти к другим направлениям.`;
+      if (lang === "en") text = `You are currently at scene ${currentSceneId} of ${getParkName()}. You can navigate to other areas from here.`;
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = langCodes[lang as keyof typeof langCodes] || "en-US";
+      utterance.rate = 0.9;
+      
+      // Kichik kechikish bilan o'qish (sahna ochilgandan so'ng)
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 1000);
+    }
+    
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, [currentSceneId, isInclusiveMode, isInitialLoading, lang]);
+
   const handleSceneChange = (targetId: string, direction: "OLDINGA" | "ORTGA") => {
     if (!user) {
       setShowAuthWall(true);
@@ -326,21 +357,48 @@ const TourViewer = () => {
       </div>
 
       <div className="absolute inset-0 pointer-events-none z-10 font-display">
-        <motion.button initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-6 z-30 glass rounded-full px-5 py-2.5 flex items-center gap-2 text-white pointer-events-auto shadow-lg" onClick={() => navigate("/")}>
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-semibold tracking-wider">{t.back}</span>
-        </motion.button>
-        <div className="absolute top-6 right-6 z-30 flex items-center gap-3 pointer-events-auto">
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            className={`glass rounded-full p-3 shadow-lg transition-colors ${showMap ? 'bg-accent/40 border-accent/50' : ''}`} 
-            onClick={() => setShowMap(!showMap)}
-          >
-            <MapIcon className={`w-5 h-5 ${showMap ? 'text-white' : 'text-white/80'}`} />
-          </motion.button>
-          <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setShowInfo(!showInfo)}><Info className="w-5 h-5 text-accent" /></motion.button>
-          <motion.button className="glass rounded-full p-3 shadow-lg" onClick={() => setSoundOn(!soundOn)}>{soundOn ? <Volume2 className="w-5 h-5 text-white" /> : <VolumeX className="w-5 h-5 text-white" />}</motion.button>
-        </div>
+          {/* Top Bar with High Contrast Support */}
+          <div className={`absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-20 pointer-events-none transition-colors duration-500 ${isInclusiveMode ? 'bg-gradient-to-b from-black/90 to-transparent' : 'bg-gradient-to-b from-black/60 to-transparent'}`}>
+            <div className="flex gap-4 pointer-events-auto">
+              <button 
+                onClick={() => navigate('/')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md transition-all ${
+                  isInclusiveMode 
+                    ? 'bg-black text-white border-2 border-white text-lg font-bold shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                }`}
+              >
+                <ArrowLeft className={isInclusiveMode ? "w-6 h-6" : "w-5 h-5"} />
+                <span className={`font-medium ${isInclusiveMode ? 'text-lg' : ''}`}>{t.back}</span>
+              </button>
+            </div>
+            <div className="flex gap-3 pointer-events-auto">
+              {/* Audio Guide Indicator */}
+              {isInclusiveMode && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/20 border-2 border-blue-400 text-blue-100 font-bold backdrop-blur-md animate-pulse">
+                  <Ear className="w-5 h-5" />
+                  <span>Ovozli Gid yoniq</span>
+                </div>
+              )}
+              
+              <button 
+                onClick={() => setSoundOn(!soundOn)}
+                className={`w-12 h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${
+                  isInclusiveMode ? 'bg-black border-2 border-white text-white' : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                }`}
+              >
+                {soundOn ? <Volume2 className={isInclusiveMode ? "w-7 h-7" : "w-6 h-6"} /> : <VolumeX className={isInclusiveMode ? "w-7 h-7" : "w-6 h-6 opacity-60"} />}
+              </button>
+              <button 
+                onClick={() => setShowInfo(!showInfo)}
+                className={`w-12 h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${
+                  showInfo ? "bg-accent text-accent-foreground" : isInclusiveMode ? "bg-black border-2 border-white text-white" : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                }`}
+              >
+                <Info className={isInclusiveMode ? "w-7 h-7" : "w-6 h-6"} />
+              </button>
+            </div>
+          </div>
 
         <div className="absolute top-[84px] left-6 sm:top-auto sm:bottom-10 sm:left-10 z-30 pointer-events-auto">
           <AirQualityWidget />
@@ -407,12 +465,12 @@ const TourViewer = () => {
         </AnimatePresence>
 
         <AnimatePresence>{showInfo && (
-          <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 glass-strong z-50 pointer-events-auto flex flex-col p-10 border-l border-white/10 shadow-2xl">
-            <div className="flex items-center justify-between mb-10"><h2 className="text-2xl font-bold text-white tracking-tight">{t.infoTitle}</h2><button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X className="w-6 h-6 text-white/50" /></button></div>
+          <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className={`absolute top-0 right-0 bottom-0 w-full sm:w-80 md:w-96 z-50 pointer-events-auto flex flex-col p-10 border-l shadow-2xl transition-colors ${isInclusiveMode ? 'bg-black border-white/40' : 'glass-strong border-white/10'}`}>
+            <div className="flex items-center justify-between mb-10"><h2 className={`font-bold tracking-tight ${isInclusiveMode ? 'text-3xl text-white' : 'text-2xl text-white'}`}>{t.infoTitle}</h2><button onClick={() => setShowInfo(false)} className={`p-2 rounded-full transition-all ${isInclusiveMode ? 'bg-white/20 hover:bg-white/40' : 'hover:bg-white/10'}`}><X className={`w-6 h-6 ${isInclusiveMode ? 'text-white' : 'text-white/50'}`} /></button></div>
             <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
-              <img src={parkData?.coverUrl || (parkId === "botanika" ? parkBotanika : parkId === "islamic-center" ? parkIslamicCenter : parkEcoPark)} alt={getParkName()} className="w-full h-56 object-cover rounded-2xl shadow-xl border border-white/10" />
+              <img src={parkData?.coverUrl || (parkId === "botanika" ? parkBotanika : parkId === "islamic-center" ? parkIslamicCenter : parkEcoPark)} alt={getParkName()} className={`w-full h-56 object-cover rounded-2xl shadow-xl border ${isInclusiveMode ? 'border-white/30' : 'border-white/10'}`} />
               <div className="prose prose-invert prose-sm">
-                <p className="text-white/70 leading-relaxed text-lg font-body">{getLocalizedDesc()}</p>
+                <p className={`leading-relaxed font-body ${isInclusiveMode ? 'text-white text-xl font-medium' : 'text-white/70 text-lg'}`}>{getLocalizedDesc()}</p>
               </div>
 
               {/* ═══ Sharoitlar belgilari ═══ */}
@@ -426,18 +484,15 @@ const TourViewer = () => {
                       {lang === "uz" ? "Sharoitlar" : lang === "ru" ? "Удобства" : "Facilities"}
                     </h3>
 
-                    {/* Mavjud sharoitlar */}
-                    <div className="flex flex-wrap gap-2">
+                    {/* Mavjud sharoitlar (Premium Panel yondashuvi) */}
+                    <div className="flex flex-col gap-2">
                       {availableKeys.map(key => (
-                        <span key={key} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold">
-                          <span>{FACILITY_LABELS[key]?.emoji}</span>
-                          <span>{FACILITY_LABELS[key]?.[langKey]}</span>
-                        </span>
+                        <FacilityBadge key={key} facilityKey={key} variant="panel" />
                       ))}
                     </div>
 
                     {/* Soya, shovqin, narx, ish vaqti */}
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs mt-4">
                       <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
                         <span className="text-white/40 block mb-0.5">🌳 {lang === "uz" ? "Soya" : lang === "ru" ? "Тень" : "Shade"}</span>
                         <span className="text-white font-semibold">{LEVEL_LABELS.shade_level[facilities.shade_level]?.[langKey]}</span>
@@ -446,13 +501,13 @@ const TourViewer = () => {
                         <span className="text-white/40 block mb-0.5">🔊 {lang === "uz" ? "Shovqin" : lang === "ru" ? "Шум" : "Noise"}</span>
                         <span className="text-white font-semibold">{LEVEL_LABELS.noise_level[facilities.noise_level]?.[langKey]}</span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-white/40 block mb-0.5">🎫 {lang === "uz" ? "Kirish" : lang === "ru" ? "Вход" : "Entry"}</span>
-                        <span className="text-white font-semibold">{LEVEL_LABELS.entry_fee[facilities.entry_fee]?.[langKey]}</span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-white/40 block mb-0.5">🕐 {lang === "uz" ? "Ish vaqti" : lang === "ru" ? "Часы" : "Hours"}</span>
-                        <span className="text-white font-semibold">{facilities.working_hours}</span>
+                      <EntryFeeBadge feeType={facilities.entry_fee} variant="panel" />
+                      <div className="p-2.5 rounded-xl bg-accent/10 border border-accent/20">
+                        <span className="text-accent/60 block mb-0.5 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          {lang === "uz" ? "Ish vaqti" : "Часы"}
+                        </span>
+                        <span className="text-accent font-bold uppercase">{facilities.working_hours}</span>
                       </div>
                     </div>
                   </div>
