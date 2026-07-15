@@ -71,7 +71,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
             
             <Button
               variant="outline"
-              onClick={() => window.location.href = "/"}
+              onClick={() => window.location.href = import.meta.env.BASE_URL}
               className="w-full border-white/10 hover:bg-white/5 text-white rounded-full py-6 font-semibold flex items-center justify-center gap-2 active:scale-98 transition-transform"
             >
               <Home className="w-4 h-4" />
@@ -108,7 +108,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
           <div className="flex flex-col gap-3 w-full">
             <Button
               variant="outline"
-              onClick={() => window.location.href = "/"}
+              onClick={() => window.location.href = import.meta.env.BASE_URL}
               className="w-full border-white/10 hover:bg-white/5 text-white rounded-full py-6 font-semibold flex items-center justify-center gap-2 active:scale-98 transition-transform"
             >
               <Home className="w-4 h-4" />

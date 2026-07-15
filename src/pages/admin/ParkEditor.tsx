@@ -10,7 +10,19 @@ import {
   Map as MapIcon,
   HelpCircle,
   Upload,
-  CheckCircle2
+  CheckCircle2,
+  Accessibility,
+  Car,
+  Baby,
+  Coffee,
+  Wifi,
+  Bike,
+  TreePine,
+  Volume2,
+  Ticket,
+  Clock,
+  ShieldCheck,
+  Bath
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ParkFormState {
   name_uz: string;
@@ -34,6 +47,20 @@ interface ParkFormState {
   isPublished: boolean;
   lat: number;
   lng: number;
+  // Sharoitlar (Facilities)
+  has_ramp: boolean;
+  has_parking: boolean;
+  has_playground: boolean;
+  has_cafe: boolean;
+  has_nursing_room: boolean;
+  has_clean_restroom: boolean;
+  has_wifi: boolean;
+  has_bike_rental: boolean;
+  shade_level: "low" | "medium" | "high";
+  noise_level: "low" | "medium" | "high";
+  child_friendly: boolean;
+  entry_fee: "free" | "paid";
+  working_hours: string;
 }
 
 export default function ParkEditor() {
@@ -62,7 +89,21 @@ export default function ParkEditor() {
     order: 1,
     isPublished: true,
     lat: 41.31,
-    lng: 69.28
+    lng: 69.28,
+    // Sharoitlar default qiymatlari
+    has_ramp: false,
+    has_parking: false,
+    has_playground: false,
+    has_cafe: false,
+    has_nursing_room: false,
+    has_clean_restroom: false,
+    has_wifi: false,
+    has_bike_rental: false,
+    shade_level: "medium",
+    noise_level: "medium",
+    child_friendly: false,
+    entry_fee: "free",
+    working_hours: "06:00-22:00"
   });
 
   useEffect(() => {
@@ -87,7 +128,21 @@ export default function ParkEditor() {
               order: data.order || 1,
               isPublished: data.isPublished !== false,
               lat: data.lat || 41.31,
-              lng: data.lng || 69.28
+              lng: data.lng || 69.28,
+              // Sharoitlar bazadan o'qish
+              has_ramp: data.has_ramp || false,
+              has_parking: data.has_parking || false,
+              has_playground: data.has_playground || false,
+              has_cafe: data.has_cafe || false,
+              has_nursing_room: data.has_nursing_room || false,
+              has_clean_restroom: data.has_clean_restroom || false,
+              has_wifi: data.has_wifi || false,
+              has_bike_rental: data.has_bike_rental || false,
+              shade_level: data.shade_level || "medium",
+              noise_level: data.noise_level || "medium",
+              child_friendly: data.child_friendly || false,
+              entry_fee: data.entry_fee || "free",
+              working_hours: data.working_hours || "06:00-22:00"
             });
             setSlugId(parkId);
           } else {
@@ -182,6 +237,20 @@ export default function ParkEditor() {
         isPublished: form.isPublished,
         lat: Number(form.lat),
         lng: Number(form.lng),
+        // Sharoitlar bazaga yozish
+        has_ramp: form.has_ramp,
+        has_parking: form.has_parking,
+        has_playground: form.has_playground,
+        has_cafe: form.has_cafe,
+        has_nursing_room: form.has_nursing_room,
+        has_clean_restroom: form.has_clean_restroom,
+        has_wifi: form.has_wifi,
+        has_bike_rental: form.has_bike_rental,
+        shade_level: form.shade_level,
+        noise_level: form.noise_level,
+        child_friendly: form.child_friendly,
+        entry_fee: form.entry_fee,
+        working_hours: form.working_hours,
         updatedAt: new Date()
       };
 
@@ -479,6 +548,114 @@ export default function ParkEditor() {
                 onCheckedChange={(checked) => setForm({ ...form, isPublished: checked })}
                 className="data-[state=checked]:bg-accent"
               />
+            </div>
+          </div>
+
+          {/* ═══════ SHAROITLAR (Facilities) ═══════ */}
+          <div className="space-y-6 pt-6 border-t border-white/5">
+            <h3 className="text-lg font-display font-bold text-accent border-b border-white/5 pb-2">Sharoitlar (Facilities)</h3>
+            <p className="text-xs text-white/40">Parkda qanday sharoitlar borligini belgilang. Bu ma'lumotlar foydalanuvchilarga ko'rsatiladi.</p>
+            
+            {/* Yoqish/O'chirish tugmalari */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { key: "has_ramp" as const, icon: Accessibility, label: "Nogironlar uchun yo'lakcha (Rampa)", desc: "Nogironlar aravachasi uchun maxsus yo'lakcha" },
+                { key: "has_parking" as const, icon: Car, label: "Avtoturargoh (Parking)", desc: "Mashina qo'yish uchun joy" },
+                { key: "has_playground" as const, icon: Baby, label: "Bolalar maydonchasi", desc: "Bolalar o'ynashi uchun xavfsiz maydoncha" },
+                { key: "has_cafe" as const, icon: Coffee, label: "Kafe / Choyxona", desc: "Ovqatlanish va ichimlik sotib olish joyi" },
+                { key: "has_nursing_room" as const, icon: ShieldCheck, label: "Emizish xonasi (Nursing Room)", desc: "Bolali onalar uchun maxsus xona" },
+                { key: "has_clean_restroom" as const, icon: Bath, label: "Toza hojatxona", desc: "Umumiy foydalanish hojatxonasi" },
+                { key: "has_wifi" as const, icon: Wifi, label: "Bepul Wi-Fi", desc: "Bepul internet tarmog'i" },
+                { key: "has_bike_rental" as const, icon: Bike, label: "Velosiped ijarasi", desc: "Velosiped ijaraga olish xizmati" },
+                { key: "child_friendly" as const, icon: Baby, label: "Bolalar uchun xavfsiz", desc: "Kichik bolalar uchun xavfsiz muhit" },
+              ].map((item) => (
+                <div key={item.key} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-white/5 text-accent">
+                      <item.icon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.label}</p>
+                      <p className="text-[11px] text-white/40">{item.desc}</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={form[item.key] as boolean}
+                    onCheckedChange={(checked) => setForm({ ...form, [item.key]: checked })}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Tanlov (Select) maydonlari */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Soya darajasi */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                  <TreePine className="w-4 h-4 text-accent" />
+                  Soya darajasi
+                </label>
+                <Select value={form.shade_level} onValueChange={(val: "low" | "medium" | "high") => setForm({ ...form, shade_level: val })}>
+                  <SelectTrigger className="glass border-white/10 text-white rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Past (kam daraxt)</SelectItem>
+                    <SelectItem value="medium">O'rtacha</SelectItem>
+                    <SelectItem value="high">Yuqori (ko'p daraxt)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Shovqin darajasi */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                  <Volume2 className="w-4 h-4 text-accent" />
+                  Shovqin darajasi
+                </label>
+                <Select value={form.noise_level} onValueChange={(val: "low" | "medium" | "high") => setForm({ ...form, noise_level: val })}>
+                  <SelectTrigger className="glass border-white/10 text-white rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Past (tinch)</SelectItem>
+                    <SelectItem value="medium">O'rtacha</SelectItem>
+                    <SelectItem value="high">Yuqori (shovqinli)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Kirish narxi */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-accent" />
+                  Kirish narxi
+                </label>
+                <Select value={form.entry_fee} onValueChange={(val: "free" | "paid") => setForm({ ...form, entry_fee: val })}>
+                  <SelectTrigger className="glass border-white/10 text-white rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Bepul</SelectItem>
+                    <SelectItem value="paid">Pullik</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Ish vaqti */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-accent" />
+                  Ish vaqti
+                </label>
+                <Input
+                  value={form.working_hours}
+                  onChange={(e) => setForm({ ...form, working_hours: e.target.value })}
+                  placeholder="06:00-22:00"
+                  className="glass border-white/10 text-white rounded-xl focus:border-accent"
+                />
+              </div>
             </div>
           </div>
 
