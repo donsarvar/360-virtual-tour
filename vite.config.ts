@@ -18,5 +18,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/360-virtual-tour/",
+  base: process.env.VERCEL ? "/" : "/360-virtual-tour/",
 }));
