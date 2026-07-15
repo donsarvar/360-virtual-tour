@@ -68,6 +68,18 @@ const TourViewer = () => {
   const [textureA, setTextureA] = useState<THREE.Texture | null>(null);
   const [textureB, setTextureB] = useState<THREE.Texture | null>(null);
   const [activeBuffer, setActiveBuffer] = useState<"A" | "B">("A");
+
+  useEffect(() => {
+    return () => {
+      if (textureA) textureA.dispose();
+    };
+  }, [textureA]);
+
+  useEffect(() => {
+    return () => {
+      if (textureB) textureB.dispose();
+    };
+  }, [textureB]);
   
   const [currentSceneId, setCurrentSceneId] = useState("1");
   const [opacityA, setOpacityA] = useState(1);
@@ -289,7 +301,11 @@ const TourViewer = () => {
     const audioUrl = parkData?.audioUrl;
 
     if (soundOn && audioUrl) {
-      if (!audioRef.current || audioRef.current.src !== window.location.origin + audioUrl) {
+      const cleanTargetUrl = new URL(audioUrl, window.location.origin).toString();
+      const currentSrc = audioRef.current ? decodeURIComponent(audioRef.current.src) : "";
+      const targetSrc = decodeURIComponent(cleanTargetUrl);
+
+      if (!audioRef.current || currentSrc !== targetSrc) {
         if (audioRef.current) audioRef.current.pause();
         audioRef.current = new Audio(audioUrl);
         audioRef.current.loop = true;
@@ -411,14 +427,23 @@ const TourViewer = () => {
   const backwardUrl = backwardPoint ? scenesList[backwardPoint.to]?.url : null;
 
   useEffect(() => {
-    if (forwardUrl) {
-      const img1 = new Image();
-      img1.src = forwardUrl;
-    }
-    if (backwardUrl) {
-      const img2 = new Image();
-      img2.src = backwardUrl;
-    }
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const preloadImage = async (url: string) => {
+      try {
+        await fetch(url, { signal, cache: "force-cache" });
+      } catch (err) {
+        // Ignore abort errors
+      }
+    };
+
+    if (forwardUrl) preloadImage(forwardUrl);
+    if (backwardUrl) preloadImage(backwardUrl);
+
+    return () => {
+      controller.abort();
+    };
   }, [forwardUrl, backwardUrl]);
 
   if (isInitialLoading) { return <BrandLoader progress={loadingProgress} onComplete={() => setIsInitialLoading(false)} />; }
